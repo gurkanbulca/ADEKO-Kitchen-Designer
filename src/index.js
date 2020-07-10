@@ -150,7 +150,7 @@ window.addEventListener("DOMContentLoaded", function () {
         // blueMat.emissiveColor = new BABYLON.Color3(0, 0, 0.6);
         blueBox.material = blueMat;
         blueBox.actionManager = new BABYLON.ActionManager(scene);
-        blueBox.material.alpha=0
+        blueBox.material.alpha = 0
 
         // RED BOX CONFIG
         var redBox = new BABYLON.MeshBuilder.CreateBox("redBox", { depth: 2, height: 2, width: 4 }, scene);
@@ -162,7 +162,7 @@ window.addEventListener("DOMContentLoaded", function () {
         // redMat.emissiveColor = new BABYLON.Color3(0.6, 0, 0);
         redBox.material = redMat;
         redBox.actionManager = new BABYLON.ActionManager(scene);
-        redBox.material.alpha=0
+        redBox.material.alpha = 0
 
         // GREEN BOX CONFIG
         var greenBox = new BABYLON.MeshBuilder.CreateBox("redBox", { height: 4, depth: 2, width: 2 }, scene);
@@ -174,7 +174,7 @@ window.addEventListener("DOMContentLoaded", function () {
         // greenMat.emissiveColor = new BABYLON.Color3(0, 0.6, 0);
         greenBox.material = greenMat;
         greenBox.actionManager = new BABYLON.ActionManager(scene);
-        greenBox.material.alpha=0
+        greenBox.material.alpha = 0
 
 
         //Cursor Pointer
@@ -905,6 +905,8 @@ window.addEventListener("DOMContentLoaded", function () {
                     returnButton.height = "40px"
                     returnButton.onPointerDownObservable.add(() => {
                         createUrunlerMenu()
+                        contentPanel.width = "0px"
+                        panelButtons.map(btn => btn.background = "#33334C")
                     })
                     urunList.addControl(returnButton)
                     seciliUrunler.map(seciliUrun => {
