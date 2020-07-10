@@ -18,6 +18,7 @@
   "dependencies": {
     "axios": "^0.19.2",
     "babylonjs": "^4.1.0",
+    "babylonjs-gui": "^4.1.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "socket.io": "^2.3.0"
