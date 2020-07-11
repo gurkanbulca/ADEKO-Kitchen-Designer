@@ -24,6 +24,10 @@ window.addEventListener("DOMContentLoaded", function () {
         var walls = []
         let meshPicked = false;
         var paintPickedMesh = false
+        var categories = ["Alt Dolap", "Üst Dolap", "Beyaz Eşya"]
+        var highlightedMesh = null
+
+
 
         var createMeshFromMeshInfo = function (meshInfo) {
             var mesh = new BABYLON.MeshBuilder.CreateBox("box", { depth: meshInfo.size.depth, height: meshInfo.size.height, width: meshInfo.size.width }, scene)
@@ -141,7 +145,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
         // BLUE BOX CONFIG
-        var blueBox = BABYLON.Mesh.CreateBox("blueBox", 2, scene);
+        var blueBox = BABYLON.Mesh.CreateBox("Deneme Dolap", 2, scene);
         blueBox.position.z -= 20;
         blueBox.position.x -= 2;
         var blueMat = new BABYLON.StandardMaterial("blueMat", scene)
@@ -153,7 +157,7 @@ window.addEventListener("DOMContentLoaded", function () {
         blueBox.material.alpha = 0
 
         // RED BOX CONFIG
-        var redBox = new BABYLON.MeshBuilder.CreateBox("redBox", { depth: 2, height: 2, width: 4 }, scene);
+        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 2, height: 2, width: 4 }, scene);
         redBox.position.z -= 20;
         redBox.position.x -= 11;
         var redMat = new BABYLON.StandardMaterial("redMat", scene)
@@ -165,7 +169,7 @@ window.addEventListener("DOMContentLoaded", function () {
         redBox.material.alpha = 0
 
         // GREEN BOX CONFIG
-        var greenBox = new BABYLON.MeshBuilder.CreateBox("redBox", { height: 4, depth: 2, width: 2 }, scene);
+        var greenBox = new BABYLON.MeshBuilder.CreateBox("Deneme Buzdolabı", { height: 4, depth: 2, width: 2 }, scene);
         greenBox.position.z -= 20;
         greenBox.position.x += 8;
         var greenMat = new BABYLON.StandardMaterial("greenMat", scene)
@@ -222,7 +226,25 @@ window.addEventListener("DOMContentLoaded", function () {
         wall4.isPickable = false
         walls.push(wall4)
 
-
+        var urunler = [{
+            name: "Deneme Dolap",
+            mesh: blueBox,
+            tags: ["Alt Dolap"],
+            image: "https://picsum.photos/100"
+        },
+        {
+            name: "Deneme Buzdolabı",
+            mesh: greenBox,
+            tags: ["Beyaz Eşya"],
+            image: "https://picsum.photos/100"
+        },
+        {
+            name: "Deneme Uzun Dolap",
+            mesh: redBox,
+            tags: ["Alt Dolap"],
+            image: "https://picsum.photos/100"
+        }
+        ]
 
 
         // var intersectToAnyCollider = function (collider) {
@@ -256,8 +278,20 @@ window.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        scene.registerBeforeRender(() => { // seçilmiş meshin hareket mekaniği
+        scene.registerBeforeRender(() => {
+            // Highlight edilmis meshin parlatılması
+            if (highlightedMesh) {
+                objects.map(object => {
+                    if (highlightedMesh == object) {
+                        object.material.emissiveColor = new BABYLON.Color3.FromHexString("#ff8400")
+                    } else {
+                        object.material.emissiveColor = new BABYLON.Color3.Black()
+                    }
+                })
+            }
 
+
+            // seçilmiş meshin hareket mekaniği
             paintPickedMesh = false
             if (meshPicked) { // sadece herhangi bir mesh yerleştirmek için seçildiğinde çalışır
                 // mouse konumunun koordinat düzlemine aktarılması <..
@@ -498,104 +532,7 @@ window.addEventListener("DOMContentLoaded", function () {
         )
 
         // Seçili objeyi yerleştiren fonksiyon.
-        var putMesh = function () {
 
-            if (pickedMesh.intersectsMesh(ground, false) && !paintPickedMesh) {
-
-
-                var mesh = new BABYLON.MeshBuilder.CreateBox("box", {
-                    width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x * 2,
-                    height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
-                    depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z * 2
-                },
-                    scene);
-                var front = new BABYLON.MeshBuilder.CreateBox("front", {
-                    width: mesh.getBoundingInfo().boundingBox.extendSize.x * 2,
-                    height: mesh.getBoundingInfo().boundingBox.extendSize.y * 2,
-                    depth: 2
-                }, scene)
-                front.isPickable = false
-                front.setParent(mesh),
-                    front.parent = mesh
-                mesh.addChild(front)
-                front.position = new BABYLON.Vector3.Zero()
-                front.position.z -= (mesh.getBoundingInfo().boundingBox.extendSize.z + front.getBoundingInfo().boundingBox.extendSize.z + 0.1)
-                // front.rotation.y=rotationAmount
-                front.material = new BABYLON.StandardMaterial("front", scene)
-                front.material.diffuseColor = new BABYLON.Color3(66 / 255, 135 / 255, 245 / 255)
-                front.material.wireframe = true
-
-                mesh.rotation.y = rotationAmount
-
-                var material = new BABYLON.StandardMaterial("", scene);
-                material.diffuseColor = pickedMesh.material.diffuseColor
-                material.emissiveColor = pickedMesh.material.emissiveColor
-                material.specularColor = new BABYLON.Color3.Black()
-                mesh.material = material;
-                mesh.position.x = pickedMesh.position.x
-                mesh.position.y = pickedMesh.position.y
-                mesh.position.z = pickedMesh.position.z
-
-                rotationAmount = 0;
-
-
-
-
-
-                objects.push(mesh)
-                var meshInfo = {
-                    position: {
-                        x: mesh.position.x,
-                        y: mesh.position.y,
-                        z: mesh.position.z
-                    },
-                    size: {
-                        width: mesh.getBoundingInfo().boundingBox.extendSize.x * 2,
-                        height: mesh.getBoundingInfo().boundingBox.extendSize.y * 2,
-                        depth: mesh.getBoundingInfo().boundingBox.extendSize.z * 2
-                    },
-                    rotation: {
-                        x: mesh.rotation.x,
-                        y: mesh.rotation.y,
-                        z: mesh.rotation.z,
-                    },
-                    material: {
-                        emissiveColor: {
-                            r: mesh.material.emissiveColor.r,
-                            g: mesh.material.emissiveColor.g,
-                            b: mesh.material.emissiveColor.b,
-                        },
-                        diffuseColor: {
-                            r: mesh.material.diffuseColor.r,
-                            g: mesh.material.diffuseColor.g,
-                            b: mesh.material.diffuseColor.b,
-                        },
-                    }
-
-                }
-                // socket.emit('put mesh', meshInfo)
-
-                mesh.actionManager = new BABYLON.ActionManager(scene);
-                // ÜZERİNE SAĞ TIKLANAN OBJENİN SİLİNMESİ
-                mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, function () {
-                    mesh.dispose()
-                    var index = objects.indexOf(mesh)
-                    objects.splice(index, 1);
-                    // socket.emit('delete mesh', index)
-                }))
-
-                pickedMesh.material.alpha = 0
-                meshPicked = false
-                pickedMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0)
-                pickedMesh.dispose()
-
-                redBox.material.wireframe = false
-                blueBox.material.wireframe = false
-                greenBox.material.wireframe = false
-
-            }
-
-        }
 
 
         scene.actionManager = new BABYLON.ActionManager(scene);
@@ -625,7 +562,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 if (!pickedMesh.isDisposed()) {
                     pickedMesh.dispose()
                 }
-                pickedMesh = new BABYLON.MeshBuilder.CreateBox("pickedMesh", { width: boxSize.x, height: boxSize.y, depth: boxSize.z }, scene)
+                pickedMesh = new BABYLON.MeshBuilder.CreateBox(mesh.name, { width: boxSize.x, height: boxSize.y, depth: boxSize.z }, scene)
                 pickedMesh.position = new BABYLON.Vector3(-1000, -1000, -1000)
                 var material = new BABYLON.StandardMaterial("", scene);
                 material.diffuseColor = mesh.material.diffuseColor
@@ -706,9 +643,112 @@ window.addEventListener("DOMContentLoaded", function () {
 
         }
 
-        pickFromMenu(redBox);
-        pickFromMenu(greenBox);
-        pickFromMenu(blueBox);
+        var putMesh = function () {
+
+            if (pickedMesh.intersectsMesh(ground, false) && !paintPickedMesh) {
+
+
+                var mesh = new BABYLON.MeshBuilder.CreateBox(pickedMesh.name, {
+                    width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x * 2,
+                    height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
+                    depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z * 2
+                },
+                    scene);
+                var front = new BABYLON.MeshBuilder.CreateBox("front", {
+                    width: mesh.getBoundingInfo().boundingBox.extendSize.x * 2,
+                    height: mesh.getBoundingInfo().boundingBox.extendSize.y * 2,
+                    depth: 2
+                }, scene)
+                front.isPickable = false
+                front.setParent(mesh),
+                    front.parent = mesh
+                mesh.addChild(front)
+                front.position = new BABYLON.Vector3.Zero()
+                front.position.z -= (mesh.getBoundingInfo().boundingBox.extendSize.z + front.getBoundingInfo().boundingBox.extendSize.z + 0.1)
+                // front.rotation.y=rotationAmount
+                front.material = new BABYLON.StandardMaterial("front", scene)
+                front.material.diffuseColor = new BABYLON.Color3(66 / 255, 135 / 255, 245 / 255)
+                front.material.wireframe = true
+
+                mesh.rotation.y = rotationAmount
+
+                var material = new BABYLON.StandardMaterial("", scene);
+                material.diffuseColor = pickedMesh.material.diffuseColor
+                material.emissiveColor = pickedMesh.material.emissiveColor
+                material.specularColor = new BABYLON.Color3.Black()
+                mesh.material = material;
+                mesh.position.x = pickedMesh.position.x
+                mesh.position.y = pickedMesh.position.y
+                mesh.position.z = pickedMesh.position.z
+
+                rotationAmount = 0;
+
+
+
+
+
+                objects.push(mesh)
+                var meshInfo = {
+                    position: {
+                        x: mesh.position.x,
+                        y: mesh.position.y,
+                        z: mesh.position.z
+                    },
+                    size: {
+                        width: mesh.getBoundingInfo().boundingBox.extendSize.x * 2,
+                        height: mesh.getBoundingInfo().boundingBox.extendSize.y * 2,
+                        depth: mesh.getBoundingInfo().boundingBox.extendSize.z * 2
+                    },
+                    rotation: {
+                        x: mesh.rotation.x,
+                        y: mesh.rotation.y,
+                        z: mesh.rotation.z,
+                    },
+                    material: {
+                        emissiveColor: {
+                            r: mesh.material.emissiveColor.r,
+                            g: mesh.material.emissiveColor.g,
+                            b: mesh.material.emissiveColor.b,
+                        },
+                        diffuseColor: {
+                            r: mesh.material.diffuseColor.r,
+                            g: mesh.material.diffuseColor.g,
+                            b: mesh.material.diffuseColor.b,
+                        },
+                    }
+
+                }
+                // socket.emit('put mesh', meshInfo)
+
+                mesh.actionManager = new BABYLON.ActionManager(scene);
+                // ÜZERİNE SAĞ TIKLANAN OBJENİN SİLİNMESİ
+                mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, function () {
+                    mesh.dispose()
+                    var index = objects.indexOf(mesh)
+                    objects.splice(index, 1);
+                    // socket.emit('delete mesh', index)
+                }))
+                // Üzerine sol tıklandığında obje özelliklerinin menüde görüntülenmesi
+                mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function () {
+                    highlightedMesh = mesh
+                    contentPanel.width = "350px"
+                    createBilgilerMenu()
+                }))
+
+                pickedMesh.material.alpha = 0
+                meshPicked = false
+                pickedMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0)
+                pickedMesh.dispose()
+
+                redBox.material.wireframe = false
+                blueBox.material.wireframe = false
+                greenBox.material.wireframe = false
+
+            }
+
+        }
+
+
 
         // SOCKET.IO
         // socket.on('put mesh', meshInfo => {
@@ -746,29 +786,41 @@ window.addEventListener("DOMContentLoaded", function () {
         contentPanel.height = 1
         contentPanel.width = "0px"
 
-        var button1 = new GUI.Button.CreateImageOnlyButton("Genel Menü", "./icons/method-draw-image.svg")
-        button1.image.stretch = GUI.Image.STRETCH_UNIFORM
-        button1.children[0].height = "25px"
-        button1.height = "60px"
-        button1.color = "transparent"
-        button1.background = "#33334C"
-        panelButtons.push(button1)
-        button1.onPointerDownObservable.add(function () {
+
+        // Menü Butonları
+        var genelButton = new GUI.Button.CreateImageOnlyButton("Genel Menü", "./icons/method-draw-image.svg")
+        genelButton.image.stretch = GUI.Image.STRETCH_UNIFORM
+        genelButton.children[0].height = "25px"
+        genelButton.height = "60px"
+        genelButton.color = "transparent"
+        genelButton.background = "#33334C"
+        panelButtons.push(genelButton)
+        genelButton.onPointerDownObservable.add(function () {
             // headerText.text = "Genel Menü"
 
         })
 
-
-        var button2 = new GUI.Button.CreateImageOnlyButton("Ürünler", "./icons/objects.svg")
-        button2.image.stretch = GUI.Image.STRETCH_UNIFORM
-        button2.children[0].height = "25px"
-        button2.height = "60px"
-        button2.color = "transparent"
-        panelButtons.push(button2)
-        button2.onPointerDownObservable.add(function () {
+        var urunlerButton = new GUI.Button.CreateImageOnlyButton("Ürünler", "./icons/objects.svg")
+        urunlerButton.image.stretch = GUI.Image.STRETCH_UNIFORM
+        urunlerButton.children[0].height = "25px"
+        urunlerButton.height = "60px"
+        urunlerButton.color = "transparent"
+        panelButtons.push(urunlerButton)
+        urunlerButton.onPointerDownObservable.add(function () {
             createUrunlerMenu()
         })
 
+        var bilgilerButton = new GUI.Button.CreateSimpleButton("Bilgiler", "İ")
+        bilgilerButton.children[0].height = "25px"
+        bilgilerButton.height = "60px"
+        bilgilerButton.color = "white"
+        bilgilerButton.thickness = 0
+        panelButtons.push(bilgilerButton)
+        bilgilerButton.onPointerDownObservable.add(function () {
+            createBilgilerMenu()
+        })
+
+        // Menü butonları için ortak fonksiyon
         panelButtons.map(button => {
             button.onPointerDownObservable.add(function () {
                 panelButtons.map(btn => btn.background = "#33334C")
@@ -778,27 +830,75 @@ window.addEventListener("DOMContentLoaded", function () {
         })
 
 
-
-        panel.addControl(button1)
-        panel.addControl(button2)
+        // Ana menü componentlerinin arayüze eklenmesi
+        panel.addControl(genelButton)
+        panel.addControl(urunlerButton)
+        panel.addControl(bilgilerButton)
         advancedTexture.addControl(leftContainer)
         leftContainer.addControl(panel)
         leftContainer.addControl(contentPanel)
 
+        // Ürün listesinin oluşturulması
+        function buildUrunList(seciliUrunler, urunList, returnText) {
+            urunList.clearControls()
+            var returnButton = new GUI.Button.CreateSimpleButton("returnButton", returnText + "  <")
+            returnButton.width = 1
+            returnButton.height = "40px"
+            returnButton.onPointerDownObservable.add(() => {
+                createUrunlerMenu()
+
+            })
+            urunList.addControl(returnButton)
+            seciliUrunler.map(seciliUrun => {
+                var urunBox = new GUI.Rectangle(seciliUrun.name)
+                urunBox.paddingLeft = "10px"
+                urunBox.paddingRight = "10px"
+                urunBox.paddingTop = "10px"
+                urunBox.width = 1
+                urunBox.height = "100px"
+                urunBox.thickness = 2
+                urunBox.color = "white"
+
+                var urunResim = new GUI.Button.CreateImageOnlyButton(seciliUrun.name + "Image", seciliUrun.image)
+                urunResim.height = "100px"
+                urunResim.width = "100px"
+                urunResim.thickness = 0
+                // urunResim.paddingLeft="10px"
+                // urunResim.paddingTop="10px"
+                // urunResim.paddingBottom="10px"
+                urunResim.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+                urunResim.onPointerDownObservable.add(() => {
+                    pickFromMenu(seciliUrun.mesh)
+                    contentPanel.width = 0
+                    panelButtons.map(btn => btn.background = "#33334C")
+                })
+
+                var urunContent = new GUI.Rectangle(seciliUrun.name + "Content")
+                urunContent.height = 1
+                urunContent.width = "225px"
+                urunContent.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
+
+                var urunTitle = new GUI.TextBlock(seciliUrun.name, seciliUrun.name)
+                urunTitle.height = "20px"
+                urunTitle.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
+                urunContent.addControl(urunTitle)
+
+                urunBox.addControl(urunResim)
+                urunBox.addControl(urunContent)
+                urunList.addControl(urunBox)
 
 
-        function createUrunlerMenu() {
-            contentPanel.clearControls()
-            // Menü İçeriği
+            })
+        }
 
-
+        function createHeader(headerName) {
             var header = new GUI.StackPanel("header")
             header.background = "#303030"
             header.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
             header.height = "60px"
 
 
-            var headerText = new GUI.TextBlock("headerText", "Ürünler")
+            var headerText = new GUI.TextBlock("headerText", headerName)
             headerText.color = "white"
             headerText.width = "150px"
 
@@ -812,14 +912,26 @@ window.addEventListener("DOMContentLoaded", function () {
             closeButton.onPointerDownObservable.add(function () {
                 contentPanel.width = "0px"
                 panelButtons.map(btn => btn.background = "#33334C")
+                if (highlightedMesh) {
+                    highlightedMesh.material.emissiveColor = new BABYLON.Color3.Black()
+                    highlightedMesh = null
+                }
+
 
             })
-
-
-
             header.addControl(headerText)
             header.addControl(closeButton)
             contentPanel.addControl(header)
+        }
+
+        // Ürünler ana menüsünün oluşturulması
+        function createUrunlerMenu() {
+            contentPanel.clearControls()
+            createHeader("Ürünler")
+            // Menü İçeriği
+
+
+
 
 
 
@@ -855,6 +967,52 @@ window.addEventListener("DOMContentLoaded", function () {
             searchInput.thickness = 0
             searchInput.height = 1
             searchInput.color = "white"
+            searchInput.onTextChangedObservable.add(() => {
+                if (searchInput.text == "") {
+                    urunList.clearControls()
+                    categories.map(category => {
+                        var button = new GUI.Button.CreateSimpleButton(category, category)
+                        button.width = 1
+                        button.height = "40px"
+                        button.onPointerDownObservable.add(() => {
+
+                            var seciliUrunler = []
+                            urunler.map(urun => {
+                                if (urun.tags.filter(tag => tag == button.name).length > 0) {
+                                    seciliUrunler.push(urun)
+                                }
+                            })
+                            buildUrunList(seciliUrunler, urunList, button.name)
+                            // switch (button.name) {
+                            //     case "Alt Dolap":
+                            //         console.log("alt dolap");
+
+
+                            //         break;
+                            //     case "Üst Dolap":
+                            //         console.log("üst dolap");
+                            //         break;
+                            //     case "Beyaz Eşya":
+                            //         console.log("Beyaz Eşya");
+                            //         break;
+
+                            // }
+
+                        })
+                        urunList.addControl(button)
+                    })
+
+                } else {
+                    var seciliUrunler = []
+                    urunler.map(urun => {
+                        if (urun.name.toLowerCase().search(searchInput.text.toLowerCase()) != -1
+                            || urun.tags.filter(tag => tag.toLowerCase().search(searchInput.text.toLowerCase()) != -1).length > 0) {
+                            seciliUrunler.push(urun)
+                        }
+                    })
+                    buildUrunList(seciliUrunler, urunList, "Arama Sonuçları")
+                }
+            })
 
             rect.addControl(searchInput)
 
@@ -864,27 +1022,7 @@ window.addEventListener("DOMContentLoaded", function () {
             urunList.width = 1
             contentPanel.addControl(urunList)
 
-            var categories = ["Alt Dolap", "Üst Dolap", "Beyaz Eşya"]
 
-            var urunler = [{
-                name: "Deneme Dolap",
-                mesh: blueBox,
-                tags: ["Alt Dolap"],
-                image: "https://picsum.photos/100"
-            },
-            {
-                name: "Deneme Buzdolabı",
-                mesh: greenBox,
-                tags: ["Beyaz Eşya"],
-                image: "https://picsum.photos/100"
-            },
-            {
-                name: "Deneme Uzun Dolap",
-                mesh: redBox,
-                tags: ["Alt Dolap"],
-                image: "https://picsum.photos/100"
-            }
-            ]
 
             categories.map(category => {
                 var button = new GUI.Button.CreateSimpleButton(category, category)
@@ -899,54 +1037,7 @@ window.addEventListener("DOMContentLoaded", function () {
                             seciliUrunler.push(urun)
                         }
                     })
-                    urunList.clearControls()
-                    var returnButton = new GUI.Button.CreateSimpleButton("returnButton", button.name + "  <")
-                    returnButton.width = 1
-                    returnButton.height = "40px"
-                    returnButton.onPointerDownObservable.add(() => {
-                        createUrunlerMenu()
-                        contentPanel.width = "0px"
-                        panelButtons.map(btn => btn.background = "#33334C")
-                    })
-                    urunList.addControl(returnButton)
-                    seciliUrunler.map(seciliUrun => {
-                        var urunBox = new GUI.Rectangle(seciliUrun.name)
-                        urunBox.paddingLeft = "10px"
-                        urunBox.paddingRight = "10px"
-                        urunBox.paddingTop = "10px"
-                        urunBox.width = 1
-                        urunBox.height = "100px"
-                        urunBox.thickness = 2
-                        urunBox.color = "white"
-
-                        var urunResim = new GUI.Button.CreateImageOnlyButton(seciliUrun.name + "Image", seciliUrun.image)
-                        urunResim.height = "100px"
-                        urunResim.width = "100px"
-                        urunResim.thickness = 0
-                        // urunResim.paddingLeft="10px"
-                        // urunResim.paddingTop="10px"
-                        // urunResim.paddingBottom="10px"
-                        urunResim.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
-                        urunResim.onPointerDownObservable.add(() => {
-                            pickFromMenu(seciliUrun.mesh)
-                        })
-
-                        var urunContent = new GUI.Rectangle(seciliUrun.name + "Content")
-                        urunContent.height = 1
-                        urunContent.width = "225px"
-                        urunContent.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
-
-                        var urunTitle = new GUI.TextBlock(seciliUrun.name, seciliUrun.name)
-                        urunTitle.height = "20px"
-                        urunTitle.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
-                        urunContent.addControl(urunTitle)
-
-                        urunBox.addControl(urunResim)
-                        urunBox.addControl(urunContent)
-                        urunList.addControl(urunBox)
-
-
-                    })
+                    buildUrunList(seciliUrunler, urunList, button.name)
                     // switch (button.name) {
                     //     case "Alt Dolap":
                     //         console.log("alt dolap");
@@ -965,6 +1056,134 @@ window.addEventListener("DOMContentLoaded", function () {
                 })
                 urunList.addControl(button)
             })
+        }
+
+        function createBilgilerMenu() {
+            contentPanel.clearControls()
+
+            // Header Bölümü
+            createHeader("Ürün Bilgileri")
+
+
+            // İçerik Bölümü
+            var bilgilerStack = new GUI.StackPanel("bilgiler")
+            bilgilerStack.width = 1
+            // bilgilerStack.top=-0.17
+            bilgilerStack.height = 1
+            contentPanel.addControl(bilgilerStack)
+
+            if (!highlightedMesh) {
+
+                var textMessage = new GUI.TextBlock("text", "Bilgilerini görüntülemek için bir ürün seçin.");
+                textMessage.color = "#474747"
+                textMessage.width = 1
+
+
+                bilgilerStack.addControl(textMessage)
+                console.log(textMessage);
+            }
+            else {
+                var urunDetayBox = new GUI.StackPanel("Urun Detay")
+                urunDetayBox.width = 1
+                urunDetayBox.height = "200px"
+                urunDetayBox.paddingLeft = "10px"
+                urunDetayBox.paddingRight = "10px"
+                urunDetayBox.paddingTop = "10px"
+                bilgilerStack.addControl(urunDetayBox)
+
+                var titleBox = new GUI.Rectangle("titleBox")
+                titleBox.height = "30px"
+                titleBox.width = 1
+                titleBox.paddingBottom = "10px"
+                titleBox.thickness = 0
+                urunDetayBox.addControl(titleBox)
+
+                // Button Box
+                var box = new GUI.Rectangle()
+                box.height = "30px"
+                box.width = "60px"
+                box.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
+                titleBox.addControl(box)
+                box.thickness = 0
+
+                //Kopyalama
+                var copy = new GUI.Button.CreateSimpleButton("delete", "c")
+                copy.height = "30px"
+                copy.width = "30px"
+                copy.color = "black"
+                copy.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+                copy.onPointerDownObservable.add(() => {
+                    pickFromMenu(highlightedMesh)
+                    highlightedMesh.material.emissiveColor = new BABYLON.Color3.Black()
+                    highlightedMesh = null
+                    contentPanel.width = "0px"
+                })
+                box.addControl(copy)
+
+                //Silme
+                var del = new GUI.Button.CreateSimpleButton("delete", "x")
+                del.height = "30px"
+                del.width = "30px"
+                del.color = "black"
+                del.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
+                del.onPointerDownObservable.add(() => {
+                    objects = objects.filter(obj => obj != highlightedMesh)
+                    highlightedMesh.dispose()
+                    highlightedMesh = null
+                    createBilgilerMenu()
+                })
+                box.addControl(del)
+
+                // Ürün adı
+
+
+                var title = new GUI.TextBlock("title", highlightedMesh.name)
+                title.height = 1
+                title.width = "120px"
+                title.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+                title.onLinesReadyObservable.add(() => {
+                    var textWidth = title.lines[0].width;
+                    var ratioWidths = title.widthInPixels / textWidth;
+                    if (ratioWidths < 1) {
+                        title.fontSize = parseFloat(title.fontSizeInPixels) * ratioWidths + "px";
+                    }
+                })
+                titleBox.addControl(title)
+
+                //Ürün Ölçüleri
+                var olculer = new GUI.Rectangle("olculer");
+                olculer.width = "70px"
+                olculer.height = "66px"
+                olculer.paddingTop = "20px"
+                olculer.thickness = 0
+                olculer.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
+                urunDetayBox.addControl(olculer)
+
+                var width = new GUI.TextBlock("width", "X:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.x * 100 + "cm");
+                width.height = "12px";
+                width.fontSize = "12px";
+                width.width = "70px";
+                width.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
+                olculer.addControl(width)
+
+                var height = new GUI.TextBlock("height", "Y:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.y * 100 + "cm");
+                height.height = "12px";
+                height.fontSize = "12px";
+                height.width = "70px";
+                height.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
+                olculer.addControl(height)
+
+                var depth = new GUI.TextBlock("depth", "Z:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.z * 100 + "cm");
+                depth.height = "12px";
+                depth.fontSize = "12px";
+                depth.width = "70px";
+                height.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM
+                olculer.addControl(depth)
+
+
+
+
+            }
         }
 
 
