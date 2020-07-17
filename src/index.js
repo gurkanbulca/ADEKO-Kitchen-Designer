@@ -13,13 +13,17 @@ window.addEventListener("DOMContentLoaded", function () {
     var canvas = document.getElementById("canvas")
     var engine = new BABYLON.Engine(canvas, true);
 
+
+
     var createScene = function () {
 
         // PARAMETERS
-        var floorSize = 30;
-        var wallSize = 8;
+
+        var boxMultiplier = 1000
+        var floorSize = 10000;
+        var wallSize = 3000;
         var originHeight = 0.0;
-        var originAlpha = 1.0;
+        var originAlpha = 0.0;
         var rotationAmount = 0;
         var objects = [];
         var walls = []
@@ -158,17 +162,19 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
         // CAMERA
-        var camera = new BABYLON.ArcRotateCamera("arcCam", Math.PI / 2, BABYLON.Tools.ToRadians(70), 55, ground, scene);
-        camera.allowUpsideDown=false
+        var camera = new BABYLON.ArcRotateCamera("arcCam", Math.PI / 2, BABYLON.Tools.ToRadians(70), floorSize * 2, ground, scene);
+        camera.upperBetaLimit = Math.PI / 2.15
+        camera.allowUpsideDown = false
+        camera.lowerRadiusLimit = wallSize * 2
+        camera.wheelPrecision = 100 / floorSize
+        camera.maxZ = 100000
         // var camera = new BABYLON.FreeCamera("cam", new BABYLON.Vector3(0, 0, 0), scene)
         // camera.setTarget(ground.position)
         camera.attachControl(canvas, true);
 
 
         // BLUE BOX CONFIG
-        var blueBox = BABYLON.Mesh.CreateBox("Deneme Dolap", 2, scene);
-        blueBox.position.z -= 20;
-        blueBox.position.x -= 2;
+        var blueBox = BABYLON.Mesh.CreateBox("Deneme Dolap", 1 * boxMultiplier, scene);
         var blueMat = new BABYLON.StandardMaterial("blueMat", scene)
         blueMat.specularColor = new BABYLON.Color3.Black()
         blueMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 1);
@@ -178,9 +184,7 @@ window.addEventListener("DOMContentLoaded", function () {
         blueBox.material.alpha = 0
 
         // RED BOX CONFIG
-        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 2, height: 2, width: 4 }, scene);
-        redBox.position.z -= 20;
-        redBox.position.x -= 11;
+        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 1 * boxMultiplier, height: 1 * boxMultiplier, width: 2 * boxMultiplier }, scene);
         var redMat = new BABYLON.StandardMaterial("redMat", scene)
         redMat.specularColor = new BABYLON.Color3.Black()
         redMat.diffuseColor = new BABYLON.Color3(1, 0.3, 0.3);
@@ -190,7 +194,7 @@ window.addEventListener("DOMContentLoaded", function () {
         redBox.material.alpha = 0
 
         // GREEN BOX CONFIG
-        var greenBox = new BABYLON.MeshBuilder.CreateBox("Deneme Buzdolabı", { height: 4, depth: 2, width: 2 }, scene);
+        var greenBox = new BABYLON.MeshBuilder.CreateBox("Deneme Buzdolabı", { height: 2 * boxMultiplier, depth: 1 * boxMultiplier, width: 1 * boxMultiplier }, scene);
         greenBox.position.z -= 20;
         greenBox.position.x += 8;
         var greenMat = new BABYLON.StandardMaterial("greenMat", scene)
@@ -253,21 +257,21 @@ window.addEventListener("DOMContentLoaded", function () {
             mesh: blueBox,
             tags: ["Alt Dolap"],
             image: "https://picsum.photos/100",
-            allowNoWall:true
+            allowNoWall: true
         },
         {
             name: "Deneme Buzdolabı",
             mesh: greenBox,
             tags: ["Beyaz Eşya"],
             image: "https://picsum.photos/100",
-            allowNoWall:false
+            allowNoWall: false
         },
         {
             name: "Deneme Uzun Dolap",
             mesh: redBox,
             tags: ["Alt Dolap"],
             image: "https://picsum.photos/100",
-            allowNoWall:false
+            allowNoWall: false
         }
         ]
 
@@ -358,8 +362,8 @@ window.addEventListener("DOMContentLoaded", function () {
                 // mouse konumunun koordinat düzlemine aktarılması <..
                 var pickResult = scene.pick(scene.pointerX, scene.pointerY);
                 if (pickResult.hit) {
-                    let mousePosition = new BABYLON.Vector3(pickResult.pickedPoint.x, originHeight, pickResult.pickedPoint.z)
-                    origin.position = mousePosition
+                    // let mousePosition = new BABYLON.Vector3(pickResult.pickedPoint.x, originHeight, pickResult.pickedPoint.z)
+                    // origin.position = mousePosition
 
                     if (origin.intersectsMesh(ground, false)) {
                         pickedMesh.position.x = origin.position.x
@@ -545,7 +549,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
                     if (calculateDistance(pickedMesh.position, origin.position)
-                        > 1) {
+                        > pickedMesh.getBoundingInfo().boundingBox.extendSize.x) {
                         pickedMesh.position.x = origin.position.x
                         pickedMesh.position.z = origin.position.z
                     }
@@ -579,7 +583,7 @@ window.addEventListener("DOMContentLoaded", function () {
                     if (collision)
                         paintPickedMesh = true;
 
-                    
+
                     if (paintPickedMesh) {
                         pickedMesh.material.emissiveColor = new BABYLON.Color3(1, 0, 0)
                     } else {
@@ -631,9 +635,19 @@ window.addEventListener("DOMContentLoaded", function () {
                     }
 
                     break;
+                case BABYLON.PointerEventTypes.POINTERMOVE:
+                    if (pickedMesh && !pickedMesh.isDisposed()) {
+                        var pickResult = scene.pick(scene.pointerX, scene.pointerY);
+                        if (pickResult.hit) {
+                            let mousePosition = new BABYLON.Vector3(pickResult.pickedPoint.x, originHeight, pickResult.pickedPoint.z)
+                            origin.position = mousePosition
+                        }
+                    }
+                    break;
 
             }
         });
+
 
 
         var pickFromMenu = function (mesh) { // obje tipi seçimi
@@ -653,10 +667,13 @@ window.addEventListener("DOMContentLoaded", function () {
                 pickedMesh.position.y = mesh.getBoundingInfo().boundingBox.extendSize.y
                 pickedMesh.actionManager = new BABYLON.ActionManager(scene)
                 pickedMesh.isPickable = false
-                pickedMesh.allowNoWall=urunler.filter(urun=>urun.mesh.name==pickedMesh.name)[0].allowNoWall
+                pickedMesh.allowNoWall = urunler.filter(urun => urun.mesh.name == pickedMesh.name)[0].allowNoWall
                 // console.log(urunler.filter(urun=>urun.mesh.name==pickedMesh.name)[0]);
                 meshPicked = true;
                 console.log(pickedMesh.allowNoWall);
+                camera.upperBetaLimit = Math.PI / 3
+                camera.lowerRadiusLimit = wallSize * 5
+
 
 
 
@@ -675,7 +692,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 var right = new BABYLON.MeshBuilder.CreateBox("right", {
                     height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
                     depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z * 1.5,
-                    width: 0.9
+                    width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x
                 })
 
 
@@ -691,7 +708,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 var left = new BABYLON.MeshBuilder.CreateBox("left", {
                     height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
                     depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z * 1.5,
-                    width: 0.9
+                    width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x
                 })
 
 
@@ -706,7 +723,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
                 var back = new BABYLON.MeshBuilder.CreateBox("back", {
                     height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
-                    depth: 0.9,
+                    depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z,
                     width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x * 1.5
                 })
 
@@ -724,9 +741,9 @@ window.addEventListener("DOMContentLoaded", function () {
                 left.material.wireframe = true
                 back.material.wireframe = true
 
-                right.material.alpha = 0.0
-                left.material.alpha = 0.0
-                back.material.alpha = 0.0
+                right.material.alpha = 1.0
+                left.material.alpha = 1.0
+                back.material.alpha = 1.0
 
 
 
@@ -752,7 +769,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 var front = new BABYLON.MeshBuilder.CreateBox("front", {
                     width: mesh.getBoundingInfo().boundingBox.extendSize.x * 1.9,
                     height: mesh.getBoundingInfo().boundingBox.extendSize.y * 2,
-                    depth: 2
+                    depth: mesh.getBoundingInfo().boundingBox.extendSize.z
                 }, scene)
 
 
@@ -766,7 +783,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 front.material = new BABYLON.StandardMaterial("front", scene)
                 front.material.diffuseColor = new BABYLON.Color3(66 / 255, 135 / 255, 245 / 255)
                 front.material.wireframe = true
-                front.material.alpha = 0.0
+                front.material.alpha = 1.0
 
                 mesh.rotation.y = rotationAmount
 
@@ -818,17 +835,20 @@ window.addEventListener("DOMContentLoaded", function () {
                 }
                 // socket.emit('put mesh', meshInfo)
 
-                mesh.actionManager = new BABYLON.ActionManager(scene);
-                // ÜZERİNE SAĞ TIKLANAN OBJENİN SİLİNMESİ
-                mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, function () {
-                    mesh.dispose()
-                    var index = objects.indexOf(mesh)
-                    objects.splice(index, 1);
-                    // socket.emit('delete mesh', index)
-                }))
+                mesh.actionManager = mesh.actionManager == null ? new BABYLON.ActionManager(scene) : mesh.actionManager;
                 // Üzerine sol tıklandığında obje özelliklerinin menüde görüntülenmesi
                 mesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, function () {
                     highlightedMesh = mesh
+                    highlightedMesh.actionManager = highlightedMesh.actionManager == null ? new BABYLON.ActionManager(scene) : highlightedMesh.actionManager;
+                    // Taşıma sağ tıklama ile
+                    highlightedMesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, () => {
+                        objects = objects.filter(obj => obj != highlightedMesh)
+                        pickFromMenu(highlightedMesh)
+                        highlightedMesh.dispose()
+                        highlightedMesh=null
+                        contentPanel.width = "0px"
+                        
+                    }))
                     contentPanel.width = "350px"
                     createBilgilerMenu()
                 }))
@@ -843,6 +863,10 @@ window.addEventListener("DOMContentLoaded", function () {
                 greenBox.material.wireframe = false
 
                 front.alpha = 0.0
+
+                camera.upperBetaLimit = Math.PI / 2.15
+                camera.lowerRadiusLimit = wallSize * 2
+
 
             }
 
@@ -924,9 +948,9 @@ window.addEventListener("DOMContentLoaded", function () {
         panelButtons.push(gorunumModuButton)
         gorunumModuButton.onPointerDownObservable.add(function () {
             if (gorunumModuButton.children[0].text == "O") {    // ORTHOGRAPHIC MODE
-                camera.position = new BABYLON.Vector3(0, 50, 0)
+                camera.position = new BABYLON.Vector3(0, floorSize * 2, 0)
                 camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
-                var distance = 75;
+                var distance = floorSize * 2;
                 var aspect = scene.getEngine().getRenderingCanvasClientRect().height / scene.getEngine().getRenderingCanvasClientRect().width;
                 camera.orthoLeft = -distance / 2;
                 camera.orthoRight = distance / 2;
@@ -1182,7 +1206,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 urunList.addControl(button)
             })
         }
-
+        // Ürün Bilgileri
         function createBilgilerMenu() {
             contentPanel.clearControls()
 
@@ -1225,17 +1249,33 @@ window.addEventListener("DOMContentLoaded", function () {
                 // Button Box
                 var box = new GUI.Rectangle()
                 box.height = "30px"
-                box.width = "60px"
+                box.width = "90px"
                 box.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
                 titleBox.addControl(box)
                 box.thickness = 0
 
+                //Taşıma arayüz üzerinden
+                var move = new GUI.Button.CreateSimpleButton("move", "M")
+                move.height = "30px"
+                move.width = "30px"
+                move.color = "black"
+                move.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+                move.onPointerDownObservable.add(() => {
+                    objects = objects.filter(obj => obj != highlightedMesh)
+                    pickFromMenu(highlightedMesh)
+                    highlightedMesh.dispose()
+                    highlightedMesh=null
+                    contentPanel.width = "0px"
+                })
+                box.addControl(move)
+
+
                 //Kopyalama
-                var copy = new GUI.Button.CreateSimpleButton("delete", "c")
+                var copy = new GUI.Button.CreateSimpleButton("copy", "C")
                 copy.height = "30px"
                 copy.width = "30px"
                 copy.color = "black"
-                copy.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT
+                copy.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
                 copy.onPointerDownObservable.add(() => {
                     pickFromMenu(highlightedMesh)
                     highlightedMesh.material.emissiveColor = new BABYLON.Color3.Black()
@@ -1245,7 +1285,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 box.addControl(copy)
 
                 //Silme
-                var del = new GUI.Button.CreateSimpleButton("delete", "x")
+                var del = new GUI.Button.CreateSimpleButton("delete", "X")
                 del.height = "30px"
                 del.width = "30px"
                 del.color = "black"
@@ -1257,6 +1297,7 @@ window.addEventListener("DOMContentLoaded", function () {
                     createBilgilerMenu()
                 })
                 box.addControl(del)
+
 
                 // Ürün adı
 
@@ -1283,35 +1324,28 @@ window.addEventListener("DOMContentLoaded", function () {
                 olculer.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT
                 urunDetayBox.addControl(olculer)
 
-                var width = new GUI.TextBlock("width", "X:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.x * 100 + "cm");
+                var width = new GUI.TextBlock("width", "X:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.x * 2 / 10 + "cm");
                 width.height = "12px";
                 width.fontSize = "12px";
                 width.width = "70px";
                 width.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP
                 olculer.addControl(width)
 
-                var height = new GUI.TextBlock("height", "Y:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.y * 100 + "cm");
+                var height = new GUI.TextBlock("height", "Y:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.y * 2 / 10 + "cm");
                 height.height = "12px";
                 height.fontSize = "12px";
                 height.width = "70px";
                 height.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_CENTER
                 olculer.addControl(height)
 
-                var depth = new GUI.TextBlock("depth", "Z:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.z * 100 + "cm");
+                var depth = new GUI.TextBlock("depth", "Z:" + highlightedMesh.getBoundingInfo().boundingBox.extendSize.z * 2 / 10 + "cm");
                 depth.height = "12px";
                 depth.fontSize = "12px";
                 depth.width = "70px";
                 height.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_BOTTOM
                 olculer.addControl(depth)
-
-
-
-
             }
         }
-
-
-
 
         return scene;
     }
@@ -1319,11 +1353,15 @@ window.addEventListener("DOMContentLoaded", function () {
     var scene = createScene();
     engine.runRenderLoop(function () {
         scene.render();
+
+
     });
 
     window.addEventListener("resize", function () {
         engine.resize();
     });
+
+
 
 
 });
