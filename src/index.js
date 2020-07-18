@@ -19,7 +19,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         // PARAMETERS
 
-        var boxMultiplier = 1000
+        var meshMultiplier = 1000
         var floorSize = 10000;
         var wallSize = 3000;
         var originHeight = 0.0;
@@ -174,7 +174,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
         // BLUE BOX CONFIG
-        var blueBox = BABYLON.Mesh.CreateBox("Deneme Dolap", 1 * boxMultiplier, scene);
+        var blueBox = BABYLON.Mesh.CreateBox("Deneme Dolap", 1 * meshMultiplier, scene);
         var blueMat = new BABYLON.StandardMaterial("blueMat", scene)
         blueMat.specularColor = new BABYLON.Color3.Black()
         blueMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 1);
@@ -184,7 +184,7 @@ window.addEventListener("DOMContentLoaded", function () {
         blueBox.material.alpha = 0
 
         // RED BOX CONFIG
-        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 1 * boxMultiplier, height: 1 * boxMultiplier, width: 2 * boxMultiplier }, scene);
+        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 1 * meshMultiplier, height: 1 * meshMultiplier, width: 2 * meshMultiplier }, scene);
         var redMat = new BABYLON.StandardMaterial("redMat", scene)
         redMat.specularColor = new BABYLON.Color3.Black()
         redMat.diffuseColor = new BABYLON.Color3(1, 0.3, 0.3);
@@ -194,7 +194,7 @@ window.addEventListener("DOMContentLoaded", function () {
         redBox.material.alpha = 0
 
         // GREEN BOX CONFIG
-        var greenBox = new BABYLON.MeshBuilder.CreateBox("Deneme Buzdolabı", { height: 2 * boxMultiplier, depth: 1 * boxMultiplier, width: 1 * boxMultiplier }, scene);
+        var greenBox = new BABYLON.MeshBuilder.CreateBox("Deneme Buzdolabı", { height: 2 * meshMultiplier, depth: 1 * meshMultiplier, width: 1 * meshMultiplier }, scene);
         greenBox.position.z -= 20;
         greenBox.position.x += 8;
         var greenMat = new BABYLON.StandardMaterial("greenMat", scene)
@@ -291,8 +291,8 @@ window.addEventListener("DOMContentLoaded", function () {
         BABYLON.SceneLoader.ImportMesh("", "./meshes/Door/", "Vintage-Door.obj", scene, function (mesh) {
             mesh.map(m => {
                 m.position.y = 0
-                m.scaling = new BABYLON.Vector3(0.08, 0.08, 0.08)
-                m.position.x = -floorSize / 2
+                m.scaling = new BABYLON.Vector3(30, 30, 30)
+                m.position.x = -floorSize / 2+20
             })
             mesh[1].material = new BABYLON.StandardMaterial("", scene)
             mesh[1].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
@@ -549,7 +549,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
                     if (calculateDistance(pickedMesh.position, origin.position)
-                        > pickedMesh.getBoundingInfo().boundingBox.extendSize.x) {
+                        > meshMultiplier / 2) {
                         pickedMesh.position.x = origin.position.x
                         pickedMesh.position.z = origin.position.z
                     }
@@ -692,7 +692,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 var right = new BABYLON.MeshBuilder.CreateBox("right", {
                     height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
                     depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z * 1.5,
-                    width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x
+                    width: meshMultiplier / 2
                 })
 
 
@@ -708,7 +708,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 var left = new BABYLON.MeshBuilder.CreateBox("left", {
                     height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
                     depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z * 1.5,
-                    width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x
+                    width: meshMultiplier / 2
                 })
 
 
@@ -723,7 +723,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
                 var back = new BABYLON.MeshBuilder.CreateBox("back", {
                     height: pickedMesh.getBoundingInfo().boundingBox.extendSize.y * 2,
-                    depth: pickedMesh.getBoundingInfo().boundingBox.extendSize.z,
+                    depth: meshMultiplier / 2,
                     width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x * 1.5
                 })
 
@@ -845,9 +845,9 @@ window.addEventListener("DOMContentLoaded", function () {
                         objects = objects.filter(obj => obj != highlightedMesh)
                         pickFromMenu(highlightedMesh)
                         highlightedMesh.dispose()
-                        highlightedMesh=null
+                        highlightedMesh = null
                         contentPanel.width = "0px"
-                        
+
                     }))
                     contentPanel.width = "350px"
                     createBilgilerMenu()
@@ -1264,7 +1264,7 @@ window.addEventListener("DOMContentLoaded", function () {
                     objects = objects.filter(obj => obj != highlightedMesh)
                     pickFromMenu(highlightedMesh)
                     highlightedMesh.dispose()
-                    highlightedMesh=null
+                    highlightedMesh = null
                     contentPanel.width = "0px"
                 })
                 box.addControl(move)
