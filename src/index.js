@@ -2,6 +2,9 @@ import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import 'babylonjs-loaders';
 // import axios from "axios";
+import $ from "jquery";
+import { VertexBody } from "./meshGenerator"
+
 
 
 
@@ -18,17 +21,19 @@ window.addEventListener("DOMContentLoaded", function () {
     var createScene = function () {
 
         // PARAMETERS
-
         var meshMultiplier = 1000
         var floorSize = 10000;
         var wallSize = 3000;
         var originHeight = 0.0;
         var originAlpha = 0.0;
+
+        // PreDeclares
         var rotationAmount = 0;
         var objects = [];
         var walls = []
         let meshPicked = false;
         var paintPickedMesh = false
+        var showPickedMesh = true
         var categories = ["Alt Dolap", "Üst Dolap", "Beyaz Eşya"]
         var highlightedMesh = null
 
@@ -64,8 +69,6 @@ window.addEventListener("DOMContentLoaded", function () {
             return mesh;
         }
 
-
-
         var isMobile = {
             Android: function () {
                 return navigator.userAgent.match(/Android/i);
@@ -80,6 +83,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 return navigator.userAgent.match(/IEMobile/i);
             }, any: function () { return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows()); }
         };
+
         // Sahne
         var scene = new BABYLON.Scene(engine);
         scene.collisionsEnabled = true;
@@ -87,7 +91,6 @@ window.addEventListener("DOMContentLoaded", function () {
         scene.clearColor = new BABYLON.Color3(1, 1, 1)
 
         // PREFIX
-
         let pickedMesh = new BABYLON.Mesh.CreateBox("box", 1, scene)
         pickedMesh.material = new BABYLON.StandardMaterial("", scene)
         pickedMesh.material.emissiveColor = new BABYLON.Color3(0, 0, 0)
@@ -288,14 +291,60 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
         // KAPI
+        var door = new BABYLON.Mesh("door", scene);
+
+        door.position.y = 0
+        door.position.x = -floorSize / 2 + 20
         BABYLON.SceneLoader.ImportMesh("", "./meshes/Door/", "Vintage-Door.obj", scene, function (mesh) {
             mesh.map(m => {
-                m.position.y = 0
-                m.scaling = new BABYLON.Vector3(30, 30, 30)
-                m.position.x = -floorSize / 2+20
+                // m.position.y = 0
+                // m.scaling = new BABYLON.Vector3(30, 30, 30)
+                var vertexData = new BABYLON.VertexData();
+                vertexData.positions = m.getVerticesData(BABYLON.VertexBuffer.PositionKind)
+                vertexData.indices = m.getIndices();
+                vertexData.normals = m.getVerticesData(BABYLON.VertexBuffer.NormalKind);
+                vertexData.uvs = m.getVerticesData(BABYLON.VertexBuffer.UVKind);
+                var customMesh = new BABYLON.Mesh("door_part", scene);
+                vertexData.applyToMesh(customMesh, true);
+                m.dispose()
+                door.addChild(customMesh);
+                customMesh.actionManager = new BABYLON.ActionManager(scene);
+                customMesh.actionManager.registerAction(
+                    new BABYLON.ExecuteCodeAction(
+                        BABYLON.ActionManager.OnLeftPickTrigger,
+                        () => {
+                            door.getChildMeshes().map(child => {
+                                var test = new VertexBody(child, { left: [0, 2, 3] })
+                                test.left = [0, 2, 4, 6, 7];
+                                test.center = [3, 5, 7];
+                                test.scale(test.center, -30)
+                                test.rotate(left, 30);
+                                test.ref = 30;
+
+                                console.log(child.getBoundingInfo().boundingBox.extendSize.z);
+                                test.scaleY(10);
+                                var mesh = new BABYLON.Mesh("door_part", scene, door);
+                                test.getVertexData().applyToMesh(mesh, true);
+                                mesh.position = new BABYLON.Vector3.Zero()
+                                child.dispose()
+                                // child.scaling.z+=1
+
+
+                            })
+
+
+                        }
+                    )
+                )
+                customMesh.position = new BABYLON.Vector3.Zero();
+
+
             })
+            door.scaling = new BABYLON.Vector3(30, 30, 30)
+            // camera.setTarget(new BABYLON.Vector3(door.position.x,door.position.y+1000,door.position.z))
+
             mesh[1].material = new BABYLON.StandardMaterial("", scene)
-            mesh[1].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
+            mesh[1].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg", scene)
             var pbr = new BABYLON.PBRMaterial("pbr", scene);
             mesh[3].material = pbr;
             pbr.albedoTexture = new BABYLON.Texture("./meshes/Door/Textures/Metall-scratch.png");
@@ -306,8 +355,79 @@ window.addEventListener("DOMContentLoaded", function () {
             mesh[5].material = new BABYLON.StandardMaterial("", scene)
             mesh[5].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
 
-
         })
+
+
+
+        // BABYLON.SceneLoader.ImportMesh("", "./meshes/", "test1.babylon", scene, function (meshes) {
+        //     camera.setTarget(meshes[0])
+        //     console.log(meshes);
+        //     var door = new BABYLON.Mesh("door", scene);
+        //     meshes.map(mesh=>{
+        //         mesh.setParent(door);
+        //     })
+
+        //     door.scaling = new BABYLON.Vector3(1000,1000,1000)
+        //     door.position.y=2100
+
+        //     door.getChildMeshes()[0].material=new BABYLON.StandardMaterial("",scene);
+        //     door.getChildMeshes()[1].material=new BABYLON.StandardMaterial("",scene);
+        //     door.getChildMeshes()[2].material=new BABYLON.StandardMaterial("",scene);
+
+        //     door.getChildMeshes()[0].material.diffuseColor= new BABYLON.Color3(.7,.3,.3)
+        //     door.getChildMeshes()[1].material.diffuseColor= new BABYLON.Color3(.3,.7,.3)
+        //     door.getChildMeshes()[2].material.diffuseColor= new BABYLON.Color3(.3,.3,.7)
+            
+        //     var a= [];
+        //     a.map()
+            
+        //     // var positions = [-22.5,0,0,-22.5,-2.44921270764475e-014,100,-22.5,-0.800000000000025,100,-22.5,-0.8,-1.9593701661158e-016,22.5,-2.44921270764475e-014,100,22.5,-0.800000000000025,100,22.5,-0.8,-1.9593701661158e-016,22.5,0,0,-21.5,-1.80000000000002,99,-21.5,-1.8,1,21.5,-1.80000000000002,99,21.5,-1.8,1,-16.5,-1.8,6,-16.5,-1.80000000000002,94,16.5,-1.80000000000002,94,16.5,-1.8,6,-15.5,-1.00000000000002,93,-15.5,-1,7,15.5,-1.00000000000002,93,15.5,-1,7,-16.5,-2.00000000000001,36.1666666666667,-16.5,-2.00000000000001,33.6666666666667,16.5,-2.00000000000001,33.6666666666667,16.5,-2.00000000000001,36.1666666666667,-15.5,-1.00000000000001,37.1666666666667,15.5,-1.00000000000001,37.1666666666667,-15.5,-1.00000000000001,32.6666666666667,15.5,-1.00000000000001,32.6666666666667,-16.5,-2.00000000000002,66.3333333333333,-16.5,-2.00000000000002,63.8333333333333,16.5,-2.00000000000002,63.8333333333333,16.5,-2.00000000000002,66.3333333333333,-15.5,-1.00000000000002,67.3333333333333,15.5,-1.00000000000002,67.3333333333333,-15.5,-1.00000000000002,62.8333333333333,15.5,-1.00000000000002,62.8333333333333,1.25,-2.00000000000001,33.6666666666667,-1.25,-2.00000000000001,33.6666666666667,-1.25,-2,6,1.25,-2,6,2.25,-1.00000000000001,32.6666666666667,2.25,-1,7,-2.25,-1.00000000000001,32.6666666666667,-2.25,-1,7,1.25,-2.00000000000002,63.8333333333333,-1.25,-2.00000000000002,63.8333333333333,-1.25,-2.00000000000001,36.1666666666667,1.25,-2.00000000000001,36.1666666666667,2.25,-1.00000000000002,62.8333333333333,2.25,-1.00000000000001,37.1666666666667,-2.25,-1.00000000000002,62.8333333333333,-2.25,-1.00000000000001,37.1666666666667,1.25,-2.00000000000002,94,-1.25,-2.00000000000002,94,-1.25,-2.00000000000002,66.3333333333333,1.25,-2.00000000000002,66.3333333333333,2.25,-1.00000000000002,93,2.25,-1.00000000000002,67.3333333333333,-2.25,-1.00000000000002,93,-2.25,-1.00000000000002,67.3333333333333]
+        //     // var indices = [0,1,-3,0,2,-4,1,4,-6,1,5,-3,4,5,-7,4,6,-8,6,7,-1,6,0,-4,3,2,-9,3,8,-10,2,8,-11,2,10,-6,5,10,-12,5,11,-7,11,6,-4,11,3,-10,8,9,-13,8,12,-14,8,13,-15,8,14,-11,11,10,-15,11,14,-16,11,15,-13,11,12,-10,12,13,-17,12,16,-18,13,16,-19,13,18,-15,14,18,-20,14,19,-16,15,19,-18,15,17,-13,20,21,-23,20,22,-24,20,24,-26,20,25,-24,21,26,-28,21,27,-23,28,29,-31,28,30,-32,28,32,-34,28,33,-32,29,34,-36,29,35,-31,36,37,-39,36,38,-40,36,40,-42,36,41,-40,37,42,-44,37,43,-39,44,45,-47,44,46,-48,44,48,-50,44,49,-48,45,50,-52,45,51,-47,52,53,-55,52,54,-56,52,56,-58,52,57,-56,53,58,-60,53,59,-55]
+        //     // var normals = [-1,0,0,0,0,1,0,2.44921270764475e-016,-1,-0.707106781186548,-0.707106781186548,-1.73265253647679e-016,0,0.707106781186548,-0.707106781186547,-0.707106781186548,0.707106781186548,1.73265253647679e-016,0,-0.707106781186547,-0.707106781186548,2.22044604925031e-017,1,2.44726580696943e-016,-0,-1,-2.22044604925031e-016,-0,-1,-2.66453525910038e-016,0.624695047554424,-0.78086880944303,-1.91324365562546e-016,0,0.78086880944303,0.624695047554424,0.624695047554424,0.78086880944303,1.91324365562546e-016,0,0.78086880944303,-0.624695047554424,0,1,1.77635683940025e-016,0,-0.707106781186548,0.707106781186547,0,0.707106781186547,0.707106781186548,0,1,3.5527136788005e-016,0,0.707106781186547,0.707106781186548,0,1,2.5682267557594e-016,0.707106781186547,-0.707106781186547,-1.76635401601925e-016,0.707106781186547,0.707106781186547,1.76635401601925e-016,0,1,2.40771258352444e-016,0.707106781186547,-0.707106781186547,-1.70747554881861e-016,0.707106781186547,0.707106781186547,1.70747554881861e-016,0,1,2.40771258352444e-016,0.707106781186548,-0.707106781186548,-1.73691478241893e-016,0.707106781186548,0.707106781186548,1.73691478241893e-016]
+            
+
+
+        // })
+
+
+        // var customMesh = new BABYLON.Mesh("test", scene);
+        // $.getJSON("./meshes/test.babylon").then(data => {
+        //     console.log(data);
+
+
+        //     var positions = data.meshes[0].positions;
+        //     var indices = data.meshes[0].indices;
+        //     var normals = data.meshes[0].normals;
+        //     // var normals = []
+        // BABYLON.VertexD./meshes/Door/Textures/BMAG-m.jpgata.ComputeNormals(positions, indices, normals);
+        //     console.log(normals);
+        //     var uvs = data.meshes[0].uvs;
+        //     // var uvs = [];
+
+
+        //     var vertexData = new BABYLON.VertexData();
+        //     vertexData.positions = positions;
+        //     vertexData.indices = indices;
+        //     vertexData.normals = normals;
+        //     vertexData.uvs = uvs;
+
+
+
+        //     vertexData.applyToMesh(customMesh, true);
+
+        //     customMesh.scaling = new BABYLON.Vector3(50, 50, 50);
+        //     // customMesh.position.y = 500;
+        //     customMesh.material = new BABYLON.StandardMaterial("mat",scene);
+        //     // customMesh.material.diffuseColor = new BABYLON.Color3(1,0,0)
+        //     // customMesh.material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
+        //     customMesh.material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
+
+        //     console.log(customMesh.material);
+        // })
+
+
+
+
 
         // BABYLON.SceneLoader.ImportMesh("", "./meshes/", "door1.stl", scene, function (mesh) {
         //     console.log(mesh);
@@ -556,17 +676,17 @@ window.addEventListener("DOMContentLoaded", function () {
 
 
                     // seçili meshin gösterilme koşulları
-                    var showPickedMesh = true
-                    pickedMesh.getChildMeshes().map(child => child.intersectsMesh(ground, false) ? "" : showPickedMesh = false)
 
+                    pickedMesh.getChildMeshes().filter(child => child.intersectsMesh(ground, false)).length == pickedMesh.getChildMeshes().length ? showPickedMesh = true : showPickedMesh = false
+                    console.log(showPickedMesh);
                     if (showPickedMesh) {
                         pickedMesh.material.alpha = 0.5
-                        // pickedMesh.getChildMeshes().map(child => child.material.alpha = 0.5)
-                        pickedMesh.isPickable = true
+                        pickedMesh.getChildMeshes().map(child => child.material.alpha = 0.5)
+                        // pickedMesh.isPickable = true
                     } else {
                         pickedMesh.material.alpha = 0.0
-                        // pickedMesh.getChildMeshes().map(child => child.material.alpha = 0.0)
-                        pickedMesh.isPickable = false
+                        pickedMesh.getChildMeshes().map(child => child.material.alpha = 0.0)
+                        // pickedMesh.isPickable = false
 
                     }
 
@@ -622,28 +742,28 @@ window.addEventListener("DOMContentLoaded", function () {
 
         // sahne sağ ve sol click işlemleri
         scene.onPointerObservable.add((pointerInfo) => {
-            switch (pointerInfo.type) {
-                case BABYLON.PointerEventTypes.POINTERTAP:
-                    if (pointerInfo.event.button == 0) { // sol click
-                        if (pickedMesh && !pickedMesh.isDisposed()) {
+            if (pickedMesh && !pickedMesh.isDisposed()) {
+                switch (pointerInfo.type) {
+                    case BABYLON.PointerEventTypes.POINTERTAP:
+                        if (pointerInfo.event.button == 0) { // sol click
                             putMesh()
 
+                        } else if (pointerInfo.event.button == 2) { // sağ click
+                            pickedMesh.rotation.y += BABYLON.Tools.ToRadians(90)
+                            rotationAmount += BABYLON.Tools.ToRadians(90)
                         }
-                    } else if (pointerInfo.event.button == 2) { // sağ click
-                        pickedMesh.rotation.y += BABYLON.Tools.ToRadians(90)
-                        rotationAmount += BABYLON.Tools.ToRadians(90)
-                    }
 
-                    break;
-                case BABYLON.PointerEventTypes.POINTERMOVE:
-                    if (pickedMesh && !pickedMesh.isDisposed()) {
+                        break;
+                    case BABYLON.PointerEventTypes.POINTERMOVE:
+
                         var pickResult = scene.pick(scene.pointerX, scene.pointerY);
                         if (pickResult.hit) {
                             let mousePosition = new BABYLON.Vector3(pickResult.pickedPoint.x, originHeight, pickResult.pickedPoint.z)
                             origin.position = mousePosition
                         }
-                    }
-                    break;
+
+                        break;
+                }
 
             }
         });
@@ -652,7 +772,7 @@ window.addEventListener("DOMContentLoaded", function () {
 
         var pickFromMenu = function (mesh) { // obje tipi seçimi
             var boxSize = new BABYLON.Vector3(mesh.getBoundingInfo().boundingBox.extendSize.x * 2, mesh.getBoundingInfo().boundingBox.extendSize.y * 2, mesh.getBoundingInfo().boundingBox.extendSize.z * 2)
-
+            console.log("t2");
             if (pickedMesh.material.emissiveColor.equals(new BABYLON.Color3(0, 0, 0))) {
                 if (!pickedMesh.isDisposed()) {
                     pickedMesh.dispose()
@@ -664,7 +784,7 @@ window.addEventListener("DOMContentLoaded", function () {
                 // material.emissiveColor = mesh.material.emissiveColor
                 pickedMesh.material = material;
                 pickedMesh.material.alpha = 0.5;
-                pickedMesh.position.y = mesh.getBoundingInfo().boundingBox.extendSize.y
+                pickedMesh.position.y = boxSize.y
                 pickedMesh.actionManager = new BABYLON.ActionManager(scene)
                 pickedMesh.isPickable = false
                 pickedMesh.allowNoWall = urunler.filter(urun => urun.mesh.name == pickedMesh.name)[0].allowNoWall
@@ -757,8 +877,8 @@ window.addEventListener("DOMContentLoaded", function () {
         }
 
         var putMesh = function () {
-
-            if (pickedMesh.intersectsMesh(ground, false) && !paintPickedMesh) {
+            pickedMesh.getChildMeshes().filter(child => child.intersectsMesh(ground, false)).length == pickedMesh.getChildMeshes().length ? showPickedMesh = true : showPickedMesh = false
+            if (pickedMesh.intersectsMesh(ground, false) && !paintPickedMesh && showPickedMesh) {
 
                 var mesh = new BABYLON.MeshBuilder.CreateBox(pickedMesh.name, {
                     width: pickedMesh.getBoundingInfo().boundingBox.extendSize.x * 2,
@@ -783,12 +903,15 @@ window.addEventListener("DOMContentLoaded", function () {
                 front.material = new BABYLON.StandardMaterial("front", scene)
                 front.material.diffuseColor = new BABYLON.Color3(66 / 255, 135 / 255, 245 / 255)
                 front.material.wireframe = true
-                front.material.alpha = 1.0
+                front.material.alpha = 0.0
 
                 mesh.rotation.y = rotationAmount
 
                 var material = new BABYLON.StandardMaterial("", scene);
-                material.diffuseColor = pickedMesh.material.diffuseColor
+                // material.diffuseColor = pickedMesh.material.diffuseColor
+                var myTexture = new BABYLON.Texture("./textures/floor1.jpg");
+                myTexture.uScale = 2.0
+                material.diffuseTexture = myTexture
                 material.emissiveColor = pickedMesh.material.emissiveColor
                 material.specularColor = new BABYLON.Color3.Black()
                 mesh.material = material;
@@ -842,11 +965,14 @@ window.addEventListener("DOMContentLoaded", function () {
                     highlightedMesh.actionManager = highlightedMesh.actionManager == null ? new BABYLON.ActionManager(scene) : highlightedMesh.actionManager;
                     // Taşıma sağ tıklama ile
                     highlightedMesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, () => {
-                        objects = objects.filter(obj => obj != highlightedMesh)
-                        pickFromMenu(highlightedMesh)
-                        highlightedMesh.dispose()
-                        highlightedMesh = null
-                        contentPanel.width = "0px"
+                        if (highlightedMesh) {
+                            objects = objects.filter(obj => obj != highlightedMesh)
+                            pickFromMenu(highlightedMesh)
+                            highlightedMesh.dispose()
+                            highlightedMesh = null
+                            contentPanel.width = "0px"
+                        }
+
 
                     }))
                     contentPanel.width = "350px"
