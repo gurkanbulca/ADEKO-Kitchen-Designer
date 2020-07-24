@@ -187,7 +187,7 @@ window.addEventListener("DOMContentLoaded", function () {
         blueBox.material.alpha = 0
 
         // RED BOX CONFIG
-        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 1 * meshMultiplier, height: 1 * meshMultiplier, width: 2 * meshMultiplier }, scene);
+        var redBox = new BABYLON.MeshBuilder.CreateBox("Deneme Uzun Dolap", { depth: 1 * meshMultiplier, height: 1 * meshMultiplier, width: 1.67 * meshMultiplier }, scene);
         var redMat = new BABYLON.StandardMaterial("redMat", scene)
         redMat.specularColor = new BABYLON.Color3.Black()
         redMat.diffuseColor = new BABYLON.Color3(1, 0.3, 0.3);
@@ -308,34 +308,33 @@ window.addEventListener("DOMContentLoaded", function () {
                 vertexData.applyToMesh(customMesh, true);
                 m.dispose()
                 door.addChild(customMesh);
-                customMesh.actionManager = new BABYLON.ActionManager(scene);
-                customMesh.actionManager.registerAction(
-                    new BABYLON.ExecuteCodeAction(
-                        BABYLON.ActionManager.OnLeftPickTrigger,
-                        () => {
-                            door.getChildMeshes().map(child => {
-                                var test = new VertexBody(child, { left: [0, 2, 3] })
-                                test.left = [0, 2, 4, 6, 7];
-                                test.center = [3, 5, 7];
-                                test.scale(test.center, -30)
-                                test.rotate(left, 30);
-                                test.ref = 30;
+                // customMesh.actionManager = new BABYLON.ActionManager(scene);
+                // customMesh.actionManager.registerAction(
+                //     new BABYLON.ExecuteCodeAction(
+                //         BABYLON.ActionManager.OnLeftPickTrigger,
+                //         () => {
+                //             door.getChildMeshes().map(child => {
+                //                 var test = new VertexBody(child, { left: [0, 2, 3] })
+                //                 test.left = [0, 2, 4, 6, 7];
+                //                 test.center = [3, 5, 7];
+                //                 test.scale(test.center, -30)
+                //                 test.rotate(left, 30);
+                //                 test.ref = 30;
 
-                                console.log(child.getBoundingInfo().boundingBox.extendSize.z);
-                                test.scaleY(10);
-                                var mesh = new BABYLON.Mesh("door_part", scene, door);
-                                test.getVertexData().applyToMesh(mesh, true);
-                                mesh.position = new BABYLON.Vector3.Zero()
-                                child.dispose()
-                                // child.scaling.z+=1
-
-
-                            })
+                //                 test.scaleY(10);
+                //                 var mesh = new BABYLON.Mesh("door_part", scene, door);
+                //                 test.getVertexData().applyToMesh(mesh, true);
+                //                 mesh.position = new BABYLON.Vector3.Zero()
+                //                 child.dispose()
+                //                 // child.scaling.z+=1
 
 
-                        }
-                    )
-                )
+                //             })
+
+
+                //         }
+                //     )
+                // )
                 customMesh.position = new BABYLON.Vector3.Zero();
 
 
@@ -377,14 +376,14 @@ window.addEventListener("DOMContentLoaded", function () {
         //     door.getChildMeshes()[0].material.diffuseColor= new BABYLON.Color3(.7,.3,.3)
         //     door.getChildMeshes()[1].material.diffuseColor= new BABYLON.Color3(.3,.7,.3)
         //     door.getChildMeshes()[2].material.diffuseColor= new BABYLON.Color3(.3,.3,.7)
-            
+
         //     var a= [];
         //     a.map()
-            
+
         //     // var positions = [-22.5,0,0,-22.5,-2.44921270764475e-014,100,-22.5,-0.800000000000025,100,-22.5,-0.8,-1.9593701661158e-016,22.5,-2.44921270764475e-014,100,22.5,-0.800000000000025,100,22.5,-0.8,-1.9593701661158e-016,22.5,0,0,-21.5,-1.80000000000002,99,-21.5,-1.8,1,21.5,-1.80000000000002,99,21.5,-1.8,1,-16.5,-1.8,6,-16.5,-1.80000000000002,94,16.5,-1.80000000000002,94,16.5,-1.8,6,-15.5,-1.00000000000002,93,-15.5,-1,7,15.5,-1.00000000000002,93,15.5,-1,7,-16.5,-2.00000000000001,36.1666666666667,-16.5,-2.00000000000001,33.6666666666667,16.5,-2.00000000000001,33.6666666666667,16.5,-2.00000000000001,36.1666666666667,-15.5,-1.00000000000001,37.1666666666667,15.5,-1.00000000000001,37.1666666666667,-15.5,-1.00000000000001,32.6666666666667,15.5,-1.00000000000001,32.6666666666667,-16.5,-2.00000000000002,66.3333333333333,-16.5,-2.00000000000002,63.8333333333333,16.5,-2.00000000000002,63.8333333333333,16.5,-2.00000000000002,66.3333333333333,-15.5,-1.00000000000002,67.3333333333333,15.5,-1.00000000000002,67.3333333333333,-15.5,-1.00000000000002,62.8333333333333,15.5,-1.00000000000002,62.8333333333333,1.25,-2.00000000000001,33.6666666666667,-1.25,-2.00000000000001,33.6666666666667,-1.25,-2,6,1.25,-2,6,2.25,-1.00000000000001,32.6666666666667,2.25,-1,7,-2.25,-1.00000000000001,32.6666666666667,-2.25,-1,7,1.25,-2.00000000000002,63.8333333333333,-1.25,-2.00000000000002,63.8333333333333,-1.25,-2.00000000000001,36.1666666666667,1.25,-2.00000000000001,36.1666666666667,2.25,-1.00000000000002,62.8333333333333,2.25,-1.00000000000001,37.1666666666667,-2.25,-1.00000000000002,62.8333333333333,-2.25,-1.00000000000001,37.1666666666667,1.25,-2.00000000000002,94,-1.25,-2.00000000000002,94,-1.25,-2.00000000000002,66.3333333333333,1.25,-2.00000000000002,66.3333333333333,2.25,-1.00000000000002,93,2.25,-1.00000000000002,67.3333333333333,-2.25,-1.00000000000002,93,-2.25,-1.00000000000002,67.3333333333333]
         //     // var indices = [0,1,-3,0,2,-4,1,4,-6,1,5,-3,4,5,-7,4,6,-8,6,7,-1,6,0,-4,3,2,-9,3,8,-10,2,8,-11,2,10,-6,5,10,-12,5,11,-7,11,6,-4,11,3,-10,8,9,-13,8,12,-14,8,13,-15,8,14,-11,11,10,-15,11,14,-16,11,15,-13,11,12,-10,12,13,-17,12,16,-18,13,16,-19,13,18,-15,14,18,-20,14,19,-16,15,19,-18,15,17,-13,20,21,-23,20,22,-24,20,24,-26,20,25,-24,21,26,-28,21,27,-23,28,29,-31,28,30,-32,28,32,-34,28,33,-32,29,34,-36,29,35,-31,36,37,-39,36,38,-40,36,40,-42,36,41,-40,37,42,-44,37,43,-39,44,45,-47,44,46,-48,44,48,-50,44,49,-48,45,50,-52,45,51,-47,52,53,-55,52,54,-56,52,56,-58,52,57,-56,53,58,-60,53,59,-55]
         //     // var normals = [-1,0,0,0,0,1,0,2.44921270764475e-016,-1,-0.707106781186548,-0.707106781186548,-1.73265253647679e-016,0,0.707106781186548,-0.707106781186547,-0.707106781186548,0.707106781186548,1.73265253647679e-016,0,-0.707106781186547,-0.707106781186548,2.22044604925031e-017,1,2.44726580696943e-016,-0,-1,-2.22044604925031e-016,-0,-1,-2.66453525910038e-016,0.624695047554424,-0.78086880944303,-1.91324365562546e-016,0,0.78086880944303,0.624695047554424,0.624695047554424,0.78086880944303,1.91324365562546e-016,0,0.78086880944303,-0.624695047554424,0,1,1.77635683940025e-016,0,-0.707106781186548,0.707106781186547,0,0.707106781186547,0.707106781186548,0,1,3.5527136788005e-016,0,0.707106781186547,0.707106781186548,0,1,2.5682267557594e-016,0.707106781186547,-0.707106781186547,-1.76635401601925e-016,0.707106781186547,0.707106781186547,1.76635401601925e-016,0,1,2.40771258352444e-016,0.707106781186547,-0.707106781186547,-1.70747554881861e-016,0.707106781186547,0.707106781186547,1.70747554881861e-016,0,1,2.40771258352444e-016,0.707106781186548,-0.707106781186548,-1.73691478241893e-016,0.707106781186548,0.707106781186548,1.73691478241893e-016]
-            
+
 
 
         // })
@@ -678,7 +677,6 @@ window.addEventListener("DOMContentLoaded", function () {
                     // seçili meshin gösterilme koşulları
 
                     pickedMesh.getChildMeshes().filter(child => child.intersectsMesh(ground, false)).length == pickedMesh.getChildMeshes().length ? showPickedMesh = true : showPickedMesh = false
-                    console.log(showPickedMesh);
                     if (showPickedMesh) {
                         pickedMesh.material.alpha = 0.5
                         pickedMesh.getChildMeshes().map(child => child.material.alpha = 0.5)
@@ -772,7 +770,6 @@ window.addEventListener("DOMContentLoaded", function () {
 
         var pickFromMenu = function (mesh) { // obje tipi seçimi
             var boxSize = new BABYLON.Vector3(mesh.getBoundingInfo().boundingBox.extendSize.x * 2, mesh.getBoundingInfo().boundingBox.extendSize.y * 2, mesh.getBoundingInfo().boundingBox.extendSize.z * 2)
-            console.log("t2");
             if (pickedMesh.material.emissiveColor.equals(new BABYLON.Color3(0, 0, 0))) {
                 if (!pickedMesh.isDisposed()) {
                     pickedMesh.dispose()
@@ -788,25 +785,10 @@ window.addEventListener("DOMContentLoaded", function () {
                 pickedMesh.actionManager = new BABYLON.ActionManager(scene)
                 pickedMesh.isPickable = false
                 pickedMesh.allowNoWall = urunler.filter(urun => urun.mesh.name == pickedMesh.name)[0].allowNoWall
-                // console.log(urunler.filter(urun=>urun.mesh.name==pickedMesh.name)[0]);
                 meshPicked = true;
-                console.log(pickedMesh.allowNoWall);
                 camera.upperBetaLimit = Math.PI / 3
                 camera.lowerRadiusLimit = wallSize * 5
 
-
-
-
-
-                // pickedMesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnLeftPickTrigger, putMesh))
-
-                // pickedMesh.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnRightPickTrigger, () => {
-                //     pickedMesh.rotation.y += BABYLON.Tools.ToRadians(90)
-                //     rotationAmount += BABYLON.Tools.ToRadians(90)
-                // }))
-
-                var wireframe = new BABYLON.StandardMaterial("wireframe", scene)
-                wireframe.wireframe = true;
 
 
                 var right = new BABYLON.MeshBuilder.CreateBox("right", {
@@ -819,8 +801,6 @@ window.addEventListener("DOMContentLoaded", function () {
                 right.material = new BABYLON.StandardMaterial("rightMaterial", scene)
                 right.material.diffuseColor = new BABYLON.Color3(1, 0, 0)
                 right.setParent(pickedMesh)
-                right.parent = pickedMesh
-                pickedMesh.addChild(right)
                 right.position = new BABYLON.Vector3.Zero()
                 right.position.x += pickedMesh.getBoundingInfo().boundingBox.extendSize.x + right.getBoundingInfo().boundingBox.extendSize.x;
                 right.isPickable = false
@@ -835,8 +815,6 @@ window.addEventListener("DOMContentLoaded", function () {
                 left.material = new BABYLON.StandardMaterial("leftMaterial", scene)
                 left.material.diffuseColor = new BABYLON.Color3(0, 1, 0)
                 left.setParent(pickedMesh)
-                left.parent = pickedMesh
-                pickedMesh.addChild(left)
                 left.position = new BABYLON.Vector3.Zero()
                 left.position.x -= pickedMesh.getBoundingInfo().boundingBox.extendSize.x + right.getBoundingInfo().boundingBox.extendSize.x;
                 left.isPickable = false
@@ -851,8 +829,6 @@ window.addEventListener("DOMContentLoaded", function () {
                 back.material = new BABYLON.StandardMaterial("backMaterial", scene)
                 back.material.diffuseColor = new BABYLON.Color3(0, 0, 1)
                 back.setParent(pickedMesh)
-                back.parent = pickedMesh
-                pickedMesh.addChild(back)
                 back.position = new BABYLON.Vector3.Zero()
                 back.position.z += pickedMesh.getBoundingInfo().boundingBox.extendSize.z + back.getBoundingInfo().boundingBox.extendSize.z;
                 back.isPickable = false
@@ -875,6 +851,9 @@ window.addEventListener("DOMContentLoaded", function () {
             }
 
         }
+
+
+
 
         var putMesh = function () {
             pickedMesh.getChildMeshes().filter(child => child.intersectsMesh(ground, false)).length == pickedMesh.getChildMeshes().length ? showPickedMesh = true : showPickedMesh = false
@@ -900,6 +879,8 @@ window.addEventListener("DOMContentLoaded", function () {
                 front.position = new BABYLON.Vector3.Zero()
                 front.position.z -= (mesh.getBoundingInfo().boundingBox.extendSize.z + front.getBoundingInfo().boundingBox.extendSize.z + 0.1)
                 // front.rotation.y=rotationAmount
+
+
                 front.material = new BABYLON.StandardMaterial("front", scene)
                 front.material.diffuseColor = new BABYLON.Color3(66 / 255, 135 / 255, 245 / 255)
                 front.material.wireframe = true
@@ -909,12 +890,48 @@ window.addEventListener("DOMContentLoaded", function () {
 
                 var material = new BABYLON.StandardMaterial("", scene);
                 // material.diffuseColor = pickedMesh.material.diffuseColor
-                var myTexture = new BABYLON.Texture("./textures/floor1.jpg");
-                myTexture.uScale = 2.0
-                material.diffuseTexture = myTexture
+                // var myTexture = new BABYLON.Texture("./textures/floor1.jpg");
+                // var front = new BABYLON.Mesh("front-side", scene);
+                // front.material = material;
+                // front.material.texture = myTexture;
+                // myTexture.uScale = mesh.getBoundingInfo().boundingBox.extendSize.x * 2 / 1000;
+                // myTexture.vScale = mesh.getBoundingInfo().boundingBox.extendSize.y * 2 / 1000;
+                // var rightIntersectedMesh = objects.filter(obj => obj.intersectsMesh(pickedMesh.getChildMeshes()[1]))[0]
+                // if (rightIntersectedMesh) {
+                //     calculateTextureOffset(rightIntersectedMesh, myTexture)
+                // }
+
+
+                // function recursiveCalculateTextureOffset(intersectedMesh, texture, mesh) {
+                //     calculateTextureOffset(mesh, texture)
+                //     var pointToIntersect = new BABYLON.Vector3(
+                //         intersectedMesh.position.x - (intersectedMesh.getBoundingInfo().boundingBox.extendSize.x + 0.1),
+                //         intersectedMesh.position.y,
+                //         intersectedMesh.position.z
+                //     )
+                //     var nextIntersectedMesh = objects.filter(obj => obj.intersectsPoint(pointToIntersect))[0]
+                //     console.log(nextIntersectedMesh);
+                //     if (nextIntersectedMesh) {
+                //         recursiveCalculateTextureOffset(nextIntersectedMesh, nextIntersectedMesh.material.diffuseTexture, intersectedMesh)
+                //     }
+                // }
+
+                // function calculateTextureOffset(intersectedMesh, texture) {
+                //     texture.uOffset = intersectedMesh.getBoundingInfo().boundingBox.extendSize.x * 2 / 1000 + intersectedMesh.material.diffuseTexture.uOffset
+                // }
+
+                // material.diffuseTexture = myTexture
                 material.emissiveColor = pickedMesh.material.emissiveColor
+                material.diffuseColor = pickedMesh.material.diffuseColor
                 material.specularColor = new BABYLON.Color3.Black()
                 mesh.material = material;
+
+                // var leftIntersectedMesh = objects.filter(obj => obj.intersectsMesh(pickedMesh.getChildMeshes()[0]))[0]
+                // if (leftIntersectedMesh) {
+                //     recursiveCalculateTextureOffset(leftIntersectedMesh, leftIntersectedMesh.material.diffuseTexture, mesh)
+                // }
+
+
                 mesh.position.x = pickedMesh.position.x
                 mesh.position.y = pickedMesh.position.y
                 mesh.position.z = pickedMesh.position.z
