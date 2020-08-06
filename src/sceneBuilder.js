@@ -2,7 +2,7 @@ import { parameters } from "./parameters"
 import * as BABYLON from 'babylonjs';
 
 
-export class Builder {
+export class SceneBuilder {
     static prepareScene = function (engine) {
         parameters.scene = new BABYLON.Scene(engine);
         parameters.scene.collisionsEnabled = true;
@@ -38,10 +38,10 @@ export class Builder {
     }
 
     static prepareGround = function () {
-        let xmin = -parameters.floorSize / 2;
-        let zmin = -parameters.floorSize / 2;
-        let xmax = parameters.floorSize / 2;
-        let zmax = parameters.floorSize / 2;
+        let xmin = -parameters.groundWidth / 2;
+        let zmin = -parameters.groundHeigth / 2;
+        let xmax = parameters.groundWidth / 2;
+        let zmax = parameters.groundHeigth / 2;
         let precision = {
             "w": 2,
             "h": 2
@@ -65,20 +65,50 @@ export class Builder {
         ground.material.specularPower = 1000.0;
 
 
-        parameters.ground=ground
+        parameters.ground = ground
+        return ground;
     }
 
     static prepareCamera = function () {
-        let camera = new BABYLON.ArcRotateCamera("arcCam", -Math.PI / 2, BABYLON.Tools.ToRadians(70), parameters.floorSize * 2, parameters.ground, parameters.scene);
+        let camera = new BABYLON.ArcRotateCamera("arcCam", -Math.PI / 2, BABYLON.Tools.ToRadians(70), parameters.groundHeigth * 2, parameters.ground, parameters.scene);
         camera.upperBetaLimit = Math.PI / 2.15
         camera.allowUpsideDown = false
         camera.lowerRadiusLimit = parameters.wallSize * 2
-        camera.wheelPrecision = 100 / parameters.floorSize
+        camera.wheelPrecision = 100 / ((parameters.groundHeigth + parameters.groundWidth) / 2)
         camera.maxZ = 100000
         // let camera = new BABYLON.FreeCamera("cam", new BABYLON.Vector3(0, 0, 0), parameters.scene)
         // camera.setTarget(parameters.ground.position)
         camera.attachControl(canvas, true);
 
         parameters.camera = camera
+    }
+    static createWall = function (name, material, position) {
+        let wallWidth = (position == "NORTH" || position == "SOUTH") ? parameters.groundWidth : parameters.groundHeigth;
+        console.log(wallWidth);
+        let wall = new BABYLON.MeshBuilder.CreatePlane(name, { height: parameters.wallSize, width: wallWidth }, parameters.scene);
+        wall.material = material
+        wall.isPickable = false
+        switch (position) {
+            case "NORTH":
+                wall.position = new BABYLON.Vector3(0, parameters.wallSize / 2, parameters.groundHeigth / 2)
+                break;
+
+            case "SOUTH":
+                wall.position = new BABYLON.Vector3(0, parameters.wallSize / 2, - parameters.groundHeigth / 2)
+                wall.rotation.y = BABYLON.Tools.ToRadians(180)
+                break;
+
+            case "WEST":
+                wall.position = new BABYLON.Vector3(parameters.groundWidth / 2, parameters.wallSize / 2, 0)
+                wall.rotation.y = BABYLON.Tools.ToRadians(90)
+                break;
+
+            case "EAST":
+                wall.position = new BABYLON.Vector3(-parameters.groundWidth / 2, parameters.wallSize / 2, 0)
+                wall.rotation.y = BABYLON.Tools.ToRadians(-90)
+                break;
+        }
+        return wall
+
     }
 }

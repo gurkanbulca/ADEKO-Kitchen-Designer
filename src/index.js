@@ -6,7 +6,7 @@ import $ from "jquery";
 import { VertexBody } from "./meshGenerator"
 import { MeshGenerator } from "./meshGenerator"
 import { parameters } from "./parameters"
-import { Builder } from "./builder"
+import { SceneBuilder } from "./sceneBuilder"
 import { createUrunList } from "./models"
 import { Tools } from "./tools"
 import { MyGUI } from './gui';
@@ -15,22 +15,16 @@ import { MyGUI } from './gui';
 
 
 window.addEventListener("DOMContentLoaded", function () {
-
-
-
     parameters.canvas = document.getElementById("canvas")
     let engine = new BABYLON.Engine(parameters.canvas, true);
-
-
-
+    
     let createScene = function () {
 
-        Builder.prepareScene(engine)
-        Builder.preCreatePickedMesh()
-        Builder.setLights()
-        Builder.prepareGround()
-        Builder.prepareCamera()
-
+        SceneBuilder.prepareScene(engine)
+        SceneBuilder.preCreatePickedMesh()
+        SceneBuilder.setLights()
+        SceneBuilder.prepareGround()
+        SceneBuilder.prepareCamera()
 
 
         //Cursor Pointer
@@ -42,88 +36,87 @@ window.addEventListener("DOMContentLoaded", function () {
         wallMaterial.specularColor = new BABYLON.Color3.Black()
         // wallMaterial.diffuseColor = new BABYLON.Color3.FromHexString("#ffe0c9");
         wallMaterial.diffuseTexture = new BABYLON.Texture("./textures/wall1.jpg", parameters.scene)
+        parameters.wallMaterial = wallMaterial;
 
 
-        let wallCount = 4;
-        for (let i = 0; i < wallCount; i++) {
-            let wall = MeshGenerator.createWall("wall" + (i + 1), wallMaterial)
-            parameters.walls.push(wall)
-        }
-        parameters.walls[0].position = new BABYLON.Vector3(0, parameters.wallSize / 2, parameters.floorSize / 2)
-        parameters.walls[1].position = new BABYLON.Vector3(parameters.floorSize / 2, parameters.wallSize / 2, 0)
-        parameters.walls[2].position = new BABYLON.Vector3(-parameters.floorSize / 2, parameters.wallSize / 2, 0)
-        parameters.walls[3].position = new BABYLON.Vector3(0, parameters.wallSize / 2, - parameters.floorSize / 2)
+        // let wallCount = 4;
+        // for (let i = 0; i < wallCount; i++) {
+        //     let wall = SceneBuilder.createWall("wall" + (i + 1), wallMaterial)
+        //     parameters.walls.push(wall)
+        // }
 
-        parameters.walls[1].rotation.y = BABYLON.Tools.ToRadians(90)
-        parameters.walls[2].rotation.y = BABYLON.Tools.ToRadians(-90)
-        parameters.walls[3].rotation.y = BABYLON.Tools.ToRadians(180)
+        parameters.walls.push(SceneBuilder.createWall("wall",wallMaterial,"NORTH"))
+        parameters.walls.push(SceneBuilder.createWall("wall",wallMaterial,"WEST"))
+        parameters.walls.push(SceneBuilder.createWall("wall",wallMaterial,"EAST"))
+
 
         parameters.urunler = createUrunList()
 
         // KAPI
-        let door = new BABYLON.Mesh("door", parameters.scene);
-        door.position.y = 0
-        door.position.x = -parameters.floorSize / 2 + 20
-        BABYLON.SceneLoader.ImportMesh("", "./meshes/Door/", "Vintage-Door.obj", parameters.scene, function (mesh) {
-            mesh.map(m => {
-                // m.position.y = 0
-                // m.scaling = new BABYLON.Vector3(30, 30, 30)
-                let vertexData = new BABYLON.VertexData();
-                vertexData.positions = m.getVerticesData(BABYLON.VertexBuffer.PositionKind)
-                vertexData.indices = m.getIndices();
-                vertexData.normals = m.getVerticesData(BABYLON.VertexBuffer.NormalKind);
-                vertexData.uvs = m.getVerticesData(BABYLON.VertexBuffer.UVKind);
-                let customMesh = new BABYLON.Mesh("door_part", parameters.scene);
-                vertexData.applyToMesh(customMesh, true);
-                m.dispose()
-                door.addChild(customMesh);
-                // customMesh.actionManager = new BABYLON.ActionManager(parameters.scene);
-                // customMesh.actionManager.registerAction(
-                //     new BABYLON.ExecuteCodeAction(
-                //         BABYLON.ActionManager.OnLeftPickTrigger,
-                //         () => {
-                //             door.getChildMeshes().map(child => {
-                //                 let test = new VertexBody(child, { left: [0, 2, 3] })
-                //                 test.left = [0, 2, 4, 6, 7];
-                //                 test.center = [3, 5, 7];
-                //                 test.scale(test.center, -30)
-                //                 test.rotate(left, 30);
-                //                 test.ref = 30;
+        // let door = new BABYLON.Mesh("door", parameters.scene);
+        // door.position.y = 0
+        // door.position.x = -parameters.floorSize / 2 + 20
 
-                //                 test.scaleY(10);
-                //                 let mesh = new BABYLON.Mesh("door_part", parameters.scene, door);
-                //                 test.getVertexData().applyToMesh(mesh, true);
-                //                 mesh.position = new BABYLON.Vector3.Zero()
-                //                 child.dispose()
-                //                 // child.scaling.z+=1
+        // BABYLON.SceneLoader.ImportMesh("", "./meshes/Door/", "Vintage-Door.obj", parameters.scene, function (mesh) {
+        //     mesh.map(m => {
+        //         // m.position.y = 0
+        //         // m.scaling = new BABYLON.Vector3(30, 30, 30)
+        //         let vertexData = new BABYLON.VertexData();
+        //         vertexData.positions = m.getVerticesData(BABYLON.VertexBuffer.PositionKind)
+        //         vertexData.indices = m.getIndices();
+        //         vertexData.normals = m.getVerticesData(BABYLON.VertexBuffer.NormalKind);
+        //         vertexData.uvs = m.getVerticesData(BABYLON.VertexBuffer.UVKind);
+        //         let customMesh = new BABYLON.Mesh("door_part", parameters.scene);
+        //         vertexData.applyToMesh(customMesh, true);
+        //         m.dispose()
+        //         door.addChild(customMesh);
+        //         // customMesh.actionManager = new BABYLON.ActionManager(parameters.scene);
+        //         // customMesh.actionManager.registerAction(
+        //         //     new BABYLON.ExecuteCodeAction(
+        //         //         BABYLON.ActionManager.OnLeftPickTrigger,
+        //         //         () => {
+        //         //             door.getChildMeshes().map(child => {
+        //         //                 let test = new VertexBody(child, { left: [0, 2, 3] })
+        //         //                 test.left = [0, 2, 4, 6, 7];
+        //         //                 test.center = [3, 5, 7];
+        //         //                 test.scale(test.center, -30)
+        //         //                 test.rotate(left, 30);
+        //         //                 test.ref = 30;
 
-
-                //             })
+        //         //                 test.scaleY(10);
+        //         //                 let mesh = new BABYLON.Mesh("door_part", parameters.scene, door);
+        //         //                 test.getVertexData().applyToMesh(mesh, true);
+        //         //                 mesh.position = new BABYLON.Vector3.Zero()
+        //         //                 child.dispose()
+        //         //                 // child.scaling.z+=1
 
 
-                //         }
-                //     )
-                // )
-                customMesh.position = new BABYLON.Vector3.Zero();
+        //         //             })
 
 
-            })
-            door.scaling = new BABYLON.Vector3(30, 30, 30)
-            // parameters.parameters.camera.setTarget(new BABYLON.Vector3(door.position.x,door.position.y+1000,door.position.z))
+        //         //         }
+        //         //     )
+        //         // )
+        //         customMesh.position = new BABYLON.Vector3.Zero();
 
-            mesh[1].material = new BABYLON.StandardMaterial("", parameters.scene)
-            mesh[1].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg", parameters.scene)
-            let pbr = new BABYLON.PBRMaterial("pbr", parameters.scene);
-            mesh[3].material = pbr;
-            pbr.albedoTexture = new BABYLON.Texture("./meshes/Door/Textures/Metall-scratch.png");
-            // pbr.specularColor = new BABYLON.Color3(1.0, 0.766, 0.336);
-            pbr.metallic = 1.0
-            pbr.roughness = 0.3
-            pbr.reflectionTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./meshes/Door/Textures/environment.dds", parameters.scene);
-            mesh[5].material = new BABYLON.StandardMaterial("", parameters.scene)
-            mesh[5].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
 
-        })
+        //     })
+        //     door.scaling = new BABYLON.Vector3(30, 30, 30)
+        //     // parameters.parameters.camera.setTarget(new BABYLON.Vector3(door.position.x,door.position.y+1000,door.position.z))
+
+        //     mesh[1].material = new BABYLON.StandardMaterial("", parameters.scene)
+        //     mesh[1].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg", parameters.scene)
+        //     let pbr = new BABYLON.PBRMaterial("pbr", parameters.scene);
+        //     mesh[3].material = pbr;
+        //     pbr.albedoTexture = new BABYLON.Texture("./meshes/Door/Textures/Metall-scratch.png");
+        //     // pbr.specularColor = new BABYLON.Color3(1.0, 0.766, 0.336);
+        //     pbr.metallic = 1.0
+        //     pbr.roughness = 0.3
+        //     pbr.reflectionTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("./meshes/Door/Textures/environment.dds", parameters.scene);
+        //     mesh[5].material = new BABYLON.StandardMaterial("", parameters.scene)
+        //     mesh[5].material.diffuseTexture = new BABYLON.Texture("./meshes/Door/Textures/BMAG-m.jpg")
+
+        // })
 
         parameters.scene.registerBeforeRender(() => {
             // Highlight edilmis meshin parlatılması
@@ -427,8 +420,5 @@ window.addEventListener("DOMContentLoaded", function () {
     window.addEventListener("resize", function () {
         engine.resize();
     });
-
-
-
 
 });

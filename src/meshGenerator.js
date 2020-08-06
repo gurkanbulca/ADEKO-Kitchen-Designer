@@ -499,14 +499,6 @@ export class MeshGenerator {
         box.actionManager = new BABYLON.ActionManager(parameters.scene);
 
         return box
-
-        // let blueBox = BABYLON.Mesh.CreateBox("Deneme Dolap", 1 * parameters.meshMultiplier, parameters.scene);
-        // let blueMat = new BABYLON.StandardMaterial("blueMat", parameters.scene)
-        // blueMat.specularColor = new BABYLON.Color3.Black()
-        // blueMat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 1);
-        // // blueMat.emissiveColor = new BABYLON.Color3(0, 0, 0.6);
-        // blueBox.material = blueMat;
-        // blueBox.actionManager = new BABYLON.ActionManager(parameters.scene);
     }
 
     static createPointer = function () {
@@ -524,12 +516,7 @@ export class MeshGenerator {
         return origin
     }
 
-    static createWall = function (name, material) {
-        let wall = new BABYLON.MeshBuilder.CreatePlane(name, { height: parameters.wallSize, width: parameters.floorSize }, parameters.scene);
-        wall.material = material
-        wall.isPickable = false
-        return wall
-    }
+    
 }
 
 

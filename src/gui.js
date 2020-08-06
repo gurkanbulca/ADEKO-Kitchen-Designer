@@ -2,6 +2,7 @@ import * as BABYLON from 'babylonjs';
 import * as GUI from 'babylonjs-gui';
 import { Tools } from "./tools"
 import { parameters } from "./parameters.js"
+import { SceneBuilder } from './sceneBuilder';
 
 
 export class MyGUI {
@@ -98,9 +99,10 @@ export class MyGUI {
 
         this.changeCameraMode = () => {
             if (this.gorunumModuButton.children[0].text == "O") {    // ORTHOGRAPHIC MODE
-                parameters.camera.position = new BABYLON.Vector3(0, parameters.floorSize * 2, 0)
+                parameters.camera.position = new BABYLON.Vector3(0, parameters.groundHeigth * 2, 0)
                 parameters.camera.mode = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
-                let distance = parameters.floorSize * 2;
+                // let distance = parameters.groundWidth * 2;
+                let distance = parameters.groundWidth > parameters.groundHeigth ? parameters.groundWidth * 2 : parameters.groundHeigth * 2;
                 let aspect = parameters.scene.getEngine().getRenderingCanvasClientRect().height / parameters.scene.getEngine().getRenderingCanvasClientRect().width;
                 parameters.camera.orthoLeft = distance / 2;
                 parameters.camera.orthoRight = -distance / 2;
@@ -460,11 +462,14 @@ export class MyGUI {
             this.contentPanel.addControl(this.marginBox("10px"))
             let odaAyarlariBox = new GUI.Rectangle("odaAyarlariBox")
             odaAyarlariBox.width = "80%"
-            odaAyarlariBox.height = "100px"
+            odaAyarlariBox.height = "140px"
             odaAyarlariBox.thickness = 2
             odaAyarlariBox.color = "white"
             odaAyarlariBox.cornerRadius = 5
             this.contentPanel.addControl(odaAyarlariBox)
+
+            let stackOdaAyarlari = new GUI.StackPanel("stackOdaAyarlari")
+            odaAyarlariBox.addControl(stackOdaAyarlari)
 
             let title = new GUI.TextBlock("odaAyarlariTitle", "Oda ayarları")
             title.fontSize = "18px"
@@ -474,7 +479,117 @@ export class MyGUI {
             title.resizeToFit = true
             title.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_CENTER
             title.verticalAlignment = GUI.Control._VERTICAL_ALIGNMENT_TOP
-            odaAyarlariBox.addControl(title)
+            stackOdaAyarlari.addControl(title)
+            stackOdaAyarlari.addControl(this.marginBox("10px"))
+
+
+
+            let stackOdaOlculeri = new GUI.StackPanel("stackOdaOlculeri")
+            stackOdaOlculeri.height = "20px"
+            stackOdaOlculeri.isVertical = false
+            stackOdaAyarlari.addControl(stackOdaOlculeri)
+            stackOdaAyarlari.addControl(this.marginBox("10px"))
+
+
+            let labelOdaOlculeri = new GUI.TextBlock("labelOdaOlculeri", "Oda ölçüleri:")
+            labelOdaOlculeri.fontSize = "12px"
+            labelOdaOlculeri.color = "black"
+            labelOdaOlculeri.resizeToFit = true
+            // labelOdaOlculeri.paddingLeft = "10px"
+            stackOdaOlculeri.addControl(labelOdaOlculeri)
+
+            let groundWidthInput = new GUI.InputText("groundWidthInput", parameters.groundWidth / 1000)
+            groundWidthInput.width = "40px";
+            groundWidthInput.height = "18px";
+            groundWidthInput.color = "white"
+            groundWidthInput.fontSize = "12px"
+            groundWidthInput.paddingLeft = "5px"
+            groundWidthInput.paddingRight = "5px"
+            groundWidthInput.onFocusSelectAll=true
+            stackOdaOlculeri.addControl(groundWidthInput)
+
+            let groundHeigthInput = new GUI.InputText("groundHeigthInput", parameters.groundHeigth / 1000)
+            groundHeigthInput.width = "40px";
+            groundHeigthInput.height = "18px";
+            groundHeigthInput.color = "white"
+            groundHeigthInput.fontSize = "12px"
+            groundHeigthInput.paddingLeft = "5px"
+            groundHeigthInput.paddingRight = "5px"
+            groundHeigthInput.onFocusSelectAll=true
+            stackOdaOlculeri.addControl(groundHeigthInput)
+
+            
+
+            
+
+            let boxWallScheme = new GUI.StackPanel("boxWallScheme")
+            boxWallScheme.height = "40px"
+            boxWallScheme.isVertical = false
+            stackOdaAyarlari.addControl(boxWallScheme)
+            stackOdaAyarlari.addControl(this.marginBox("10px"))
+
+            let labelWallScheme = new GUI.TextBlock("labelOdaOlculeri", "Duvar tipi:")
+            labelWallScheme.fontSize = "12px"
+            labelWallScheme.color = "black"
+            labelWallScheme.resizeToFit = true
+            // labelOdaOlculeri.paddingLeft = "10px"
+            boxWallScheme.addControl(labelWallScheme)
+
+            let groupWallScheme = new GUI.RadioGroup("groupWallScheme");
+            // boxWallScheme.addControl(groupWallScheme);
+
+            var addRadio = function (text, parent, wallScheme,isChecked) {
+
+                var button = new GUI.RadioButton();
+                button.width = "12px";
+                button.height = "12px";
+                button.color = "white";
+                button.background = "black";
+                button.isChecked = isChecked;
+
+                button.onIsCheckedChangedObservable.add(function (state) {
+                    if (state) {
+                        console.log(text);
+                        parameters.selectedWallScheme = wallScheme;
+                    }
+                });
+
+                var header = GUI.Control.AddHeader(button, text, "30px", { isHorizontal: true, controlFirst: true });
+                header.height = "15px";
+                header.fontSize = "12px"
+                header.paddingLeft = "10px"
+
+                parent.addControl(header);
+            }
+
+            addRadio("O", boxWallScheme, ["NORTH", "SOUTH", "WEST", "EAST"],true)
+            addRadio("U", boxWallScheme, ["NORTH", "WEST", "EAST"])
+            addRadio("L", boxWallScheme, ["NORTH", "EAST"])
+            addRadio("J", boxWallScheme, ["NORTH", "WEST"])
+            addRadio("_", boxWallScheme, ["NORTH"])
+
+
+
+            let buttonSetRoom = new GUI.Button.CreateSimpleButton("buttonSetGroundSize", "KAYDET")
+            buttonSetRoom.width = "65px";
+            buttonSetRoom.height = "18px";
+            buttonSetRoom.paddingLeft = "5px"
+            // buttonSetRoom.paddingRight = "5px"
+            buttonSetRoom.fontSize = "12px";
+            buttonSetRoom.onPointerDownObservable.add(() => {
+                parameters.groundWidth = groundWidthInput.text * 1000;
+                parameters.groundHeigth = groundHeigthInput.text * 1000;
+                parameters.ground.dispose()
+                SceneBuilder.prepareGround()
+                parameters.walls.map(wall => wall.dispose())
+                parameters.walls = []
+                parameters.selectedWallScheme.map(position => {
+                    let wall = SceneBuilder.createWall(position, parameters.wallMaterial, position);
+                    parameters.walls.push(wall);
+                })
+            })
+            stackOdaAyarlari.addControl(buttonSetRoom)
+
 
         }
 
